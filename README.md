@@ -1,4 +1,4 @@
-# 🚀 AI-Powered PDF Summarization & Voice-Enabled Q&A Platform 🧠🔊
+# 🚀 AI-Powered Bot powered by Gemini's Backend API🧠🔊
 
 Developed both a **web application** and a **native application** using **Streamlit**, enabling seamless **AI-driven document summarization, voice-based Q&A, and interactive chat capabilities** for enhanced user experience and productivity.
 
