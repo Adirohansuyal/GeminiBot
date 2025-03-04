@@ -59,8 +59,8 @@ else:
     """, unsafe_allow_html=True)
 
 # 🎨 Streamlit UI
-st.title("💬 AI SmartBot")
-st.write("Ask me anything or upload a PDF for summarization!")
+st.title("💬 AerriAI")
+st.write("Ask me anything or upload a PDF to AerriAI")
 
 # 📄 PDF File Upload
 uploaded_file = st.file_uploader("📂 Upload a PDF file", type=["pdf"])
@@ -81,7 +81,7 @@ if uploaded_file:
         st.text_area("PDF Content", pdf_text[:2000], height=300)
 
         # 🤖 AI-Powered Summary
-        with st.spinner("🤖 Generating Summary..."):
+        with st.spinner("🤖 AerriAI is geneating..."):
             model = genai.GenerativeModel("gemini-1.5-pro-latest")
             response = model.generate_content(f"Summarize this text:\n\n{pdf_text[:8000]}")
             summary = response.text
