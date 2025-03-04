@@ -59,8 +59,8 @@ else:
     """, unsafe_allow_html=True)
 
 # 🎨 Streamlit UI
-st.title("💬 AerriAI")
-st.write("Ask me anything or upload a PDF to AerriAI")
+st.title("💬 Aerri AI")
+st.write("Ask me anything or upload a PDF to Aerri AI")
 
 # 📄 PDF File Upload
 uploaded_file = st.file_uploader("📂 Upload a PDF file", type=["pdf"])
