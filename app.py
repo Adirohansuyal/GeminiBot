@@ -5,7 +5,7 @@ from PIL import Image
 import fitz  # PyMuPDF for PDF text extraction
 
 # 🔑 Configure API Key
-genai.configure(api_key="AIzaSyDzJcUCs5appGk8HgagDzbvPR8ZsUS9BZ0")
+genai.configure(api_key="AIzaSyDzX9W_XsaJOGDH0xnqesMEQJiBMILm0q4")
 
 # 🌙 Theme State Handling
 if "theme" not in st.session_state:
