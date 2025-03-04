@@ -59,7 +59,7 @@ else:
     """, unsafe_allow_html=True)
 
 # 🎨 Streamlit UI
-st.title("💬 AI Chatbot with PDF & Voice Support")
+st.title("💬 AI SmartBot")
 st.write("Ask me anything or upload a PDF for summarization!")
 
 # 📄 PDF File Upload
