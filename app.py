@@ -1,5 +1,6 @@
 import streamlit as st
 import google.generativeai as genai
+import google.api_core.exceptions
 import speech_recognition as sr
 from PIL import Image
 import fitz  # PyMuPDF for PDF text extraction
@@ -22,39 +23,15 @@ if st.sidebar.button("🌙 Dark Theme"):
 if st.session_state.theme == "dark":
     st.markdown("""
         <style>
-            /* Dark Theme: Full Black Background */
-            body, .main, .stApp {
-                background: linear-gradient(to right, #000000, #434343);
-;
-                color: white !important;
-            }
-            .stTextInput, .stTextArea, .stButton, .stDownloadButton, .stFileUploader {
-                background: linear-gradient(to right, #000000, #434343);
-
-
-            }
-            h1, h2, h3, p, .stMarkdown {
-                color: white !important;
-            }
+            body, .main, .stApp { background: linear-gradient(to right, #000000, #434343); color: white !important; }
+            h1, h2, h3, p, .stMarkdown { color: white !important; }
         </style>
     """, unsafe_allow_html=True)
 else:
     st.markdown("""
         <style>
-            /* Light Theme: Full White Background */
-            body, .main, .stApp {
-                background: linear-gradient(to right, #cbe8f8, #aee1fc);
-
-
-
-                color: black !important;
-            }
-            .stTextInput, .stTextArea, .stButton, .stDownloadButton, .stFileUploader {
-                background-color: #f9f9f9; color: black; border-radius: 8px;
-            }
-            h1, h2, h3, p, .stMarkdown {
-                color: black !important;
-            }
+            body, .main, .stApp { background: linear-gradient(to right, #cbe8f8, #aee1fc); color: black !important; }
+            h1, h2, h3, p, .stMarkdown { color: black !important; }
         </style>
     """, unsafe_allow_html=True)
 
@@ -81,10 +58,15 @@ if uploaded_file:
         st.text_area("PDF Content", pdf_text[:2000], height=300)
 
         # 🤖 AI-Powered Summary
-        with st.spinner("🤖 AerriAI is generating..."):
-            model = genai.GenerativeModel("gemini-1.5-pro-latest")
-            response = model.generate_content(f"Summarize this text:\n\n{pdf_text[:8000]}")
-            summary = response.text
+        try:
+            with st.spinner("🤖 AerriAI is generating..."):
+                model = genai.GenerativeModel("gemini-1.5-pro-latest")
+                response = model.generate_content(f"Summarize this text:\n\n{pdf_text[:8000]}")
+                summary = response.text
+        except google.api_core.exceptions.ResourceExhausted:
+            summary = "⚠️ Can't Connect to the Server, Please relaunch the app."
+        except google.api_core.exceptions.GoogleAPIError:
+            summary = "⚠️ An error occurred. Please try again later."
 
         st.subheader("📌 AI-Generated Summary")
         st.success("Summary Created!")
@@ -95,12 +77,18 @@ if uploaded_file:
 
         # ❓ User Question Input
         question = st.text_input("💬 Ask a question about the document:")
-            # 📌 Bullet Summary Button
+
+        # 📌 Bullet Summary Button
         if st.button("📌 Generate Bullet Summary"):
-            with st.spinner("🤖 Generating Bullet Summary..."):
-                bullet_summary_prompt = f"Summarize the following text into bullet points:\n\n{pdf_text[:8000]}"
-                bullet_response = model.generate_content(bullet_summary_prompt)
-                bullet_summary = bullet_response.text
+            try:
+                with st.spinner("🤖 Generating Bullet Summary..."):
+                    bullet_summary_prompt = f"Summarize the following text into bullet points:\n\n{pdf_text[:8000]}"
+                    bullet_response = model.generate_content(bullet_summary_prompt)
+                    bullet_summary = bullet_response.text
+            except google.api_core.exceptions.ResourceExhausted:
+                bullet_summary = "⚠️ Can't Connect to the Server, Please try again."
+            except google.api_core.exceptions.GoogleAPIError:
+                bullet_summary = "⚠️ An error occurred. Please try again later."
 
             st.subheader("📌 Bullet-Point Summary")
             st.write(bullet_summary)
@@ -133,9 +121,14 @@ if uploaded_file:
 
         # 🤖 AI Response for Question
         if question:
-            with st.spinner("🤖 Thinking..."):
-                response = model.generate_content(f"Based on the document:\n\n{pdf_text}\n\nAnswer this question: {question}")
-                answer = response.text
+            try:
+                with st.spinner("🤖 Thinking..."):
+                    response = model.generate_content(f"Based on the document:\n\n{pdf_text}\n\nAnswer this question: {question}")
+                    answer = response.text
+            except google.api_core.exceptions.ResourceExhausted:
+                answer = "⚠️ Can't Connect to the Server, Please try again."
+            except google.api_core.exceptions.GoogleAPIError:
+                answer = "⚠️ An error occurred. Please try again later."
 
             st.subheader("🤖 AI Answer:")
             st.write(answer)
@@ -143,7 +136,6 @@ if uploaded_file:
         st.error("No text found in the PDF. Try another file!")
 
 # 🗨️ **AI Chatbot Section**
-
 
 # 🔄 Initialize Chat History
 if "messages" not in st.session_state:
@@ -163,9 +155,14 @@ if user_input:
         st.markdown(user_input)
 
     # 🤖 AI Response
-    model = genai.GenerativeModel("gemini-1.5-pro-latest")
-    response = model.generate_content([msg["content"] for msg in st.session_state.messages])
-    bot_reply = response.text
+    try:
+        model = genai.GenerativeModel("gemini-1.5-pro-latest")
+        response = model.generate_content([msg["content"] for msg in st.session_state.messages])
+        bot_reply = response.text
+    except google.api_core.exceptions.ResourceExhausted:
+        bot_reply = "⚠️ Can't Connect to the Server, Please try again."
+    except google.api_core.exceptions.GoogleAPIError:
+        bot_reply = "⚠️ An error occurred. Please try again later."
 
     # 📝 Store & Display Bot Reply
     st.session_state.messages.append({"role": "assistant", "content": bot_reply})
