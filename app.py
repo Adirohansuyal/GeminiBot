@@ -59,7 +59,7 @@ else:
     """, unsafe_allow_html=True)
 
 # 🎨 Streamlit UI
-st.title("💬 Aerri A")
+st.title("💬 Aerri AII")
 st.write("Ask me anything or upload a PDF to Aerri AI")
 
 # 📄 PDF File Upload
