@@ -81,7 +81,7 @@ if uploaded_file:
         st.text_area("PDF Content", pdf_text[:2000], height=300)
 
         # 🤖 AI-Powered Summary
-        with st.spinner("🤖 AerriAI is geneating..."):
+        with st.spinner("🤖 AerriAI is generating..."):
             model = genai.GenerativeModel("gemini-1.5-pro-latest")
             response = model.generate_content(f"Summarize this text:\n\n{pdf_text[:8000]}")
             summary = response.text
@@ -143,7 +143,7 @@ if uploaded_file:
         st.error("No text found in the PDF. Try another file!")
 
 # 🗨️ **AI Chatbot Section**
-st.subheader("💬 AI Chatbot")
+
 
 # 🔄 Initialize Chat History
 if "messages" not in st.session_state:
