@@ -1,4 +1,8 @@
 import streamlit as st
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+from reportlab.lib.utils import simpleSplit
+import io
 import google.generativeai as genai
 import google.api_core.exceptions
 import speech_recognition as sr
@@ -12,14 +16,14 @@ genai.configure(api_key="AIzaSyDzX9W_XsaJOGDH0xnqesMEQJiBMILm0q4")
 if "theme" not in st.session_state:
     st.session_state.theme = "light"  # Default theme
 
-# 🎨 Theme Buttons
+# 🎨 Theme Selection in Sidebar
 st.sidebar.title("🎨 Theme Selection")
 if st.sidebar.button("🌞 Light Theme"):
     st.session_state.theme = "light"
 if st.sidebar.button("🌙 Dark Theme"):
     st.session_state.theme = "dark"
 
-# 🎨 Apply Full Page Background Theme
+# 🎨 Apply Theme Styling
 if st.session_state.theme == "dark":
     st.markdown("""
         <style>
@@ -48,6 +52,28 @@ def extract_text_from_pdf(pdf_file):
     text = "\n".join([page.get_text("text") for page in doc])
     return text
 
+# 📄 Function to Generate PDF
+def generate_pdf(content, filename="summary.pdf"):
+    pdf_buffer = io.BytesIO()
+    c = canvas.Canvas(pdf_buffer, pagesize=letter)
+    width, height = letter
+    c.setFont("Helvetica", 12)
+
+    lines = simpleSplit(content, "Helvetica", 12, width - 100)  # Auto-wrap text
+    y_position = height - 50  # Start position for text
+
+    for line in lines:
+        if y_position < 50:  # If text reaches bottom, create a new page
+            c.showPage()
+            c.setFont("Helvetica", 12)
+            y_position = height - 50
+        c.drawString(50, y_position, line)
+        y_position -= 20  # Move to next line
+
+    c.save()
+    pdf_buffer.seek(0)  # Reset buffer position
+    return pdf_buffer
+
 # 🟢 If PDF is uploaded, extract and display text
 if uploaded_file:
     with st.spinner("🔍 Extracting text..."):
@@ -59,7 +85,7 @@ if uploaded_file:
 
         # 🤖 AI-Powered Summary
         try:
-            with st.spinner("🤖 AerriAI is generating..."):
+            with st.spinner("🤖 Aerri AI is generating..."):
                 model = genai.GenerativeModel("gemini-1.5-pro-latest")
                 response = model.generate_content(f"Summarize this text:\n\n{pdf_text[:8000]}")
                 summary = response.text
@@ -72,8 +98,14 @@ if uploaded_file:
         st.success("Summary Created!")
         st.write(summary)
 
-        # 📥 Download Full Summary
-        st.download_button("📥 Download Full Summary", summary, file_name="summary.txt")
+        # 📥 Download AI-Generated Summary as PDF
+        pdf_file = generate_pdf(summary, "summary.pdf")
+        st.download_button(
+            label="📥 Download Summary as PDF",
+            data=pdf_file,
+            file_name="summary.pdf",
+            mime="application/pdf"
+        )
 
         # ❓ User Question Input
         question = st.text_input("💬 Ask a question about the document:")
@@ -93,8 +125,14 @@ if uploaded_file:
             st.subheader("📌 Bullet-Point Summary")
             st.write(bullet_summary)
 
-            # 📥 Download Bullet Summary
-            st.download_button("📥 Download Bullet Summary", bullet_summary, file_name="bullet_summary.txt")
+            # 📥 Download Bullet Summary as PDF
+            pdf_file_bullet = generate_pdf(bullet_summary, "bullet_summary.pdf")
+            st.download_button(
+                label="📥 Download Bullet Summary as PDF",
+                data=pdf_file_bullet,
+                file_name="bullet_summary.pdf",
+                mime="application/pdf"
+            )
 
         # 🎤 **Voice Input Feature**
         def recognize_speech():
@@ -156,7 +194,6 @@ if user_input:
 
     # 🤖 AI Response
     try:
-        model = genai.GenerativeModel("gemini-1.5-pro-latest")
         response = model.generate_content([msg["content"] for msg in st.session_state.messages])
         bot_reply = response.text
     except google.api_core.exceptions.ResourceExhausted:
@@ -164,7 +201,6 @@ if user_input:
     except google.api_core.exceptions.GoogleAPIError:
         bot_reply = "⚠️ An error occurred. Please try again later."
 
-    # 📝 Store & Display Bot Reply
     st.session_state.messages.append({"role": "assistant", "content": bot_reply})
     with st.chat_message("assistant"):
         st.markdown(bot_reply)
