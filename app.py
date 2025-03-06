@@ -214,17 +214,16 @@ elif page == "💬 Chat with AI":
             st.session_state.messages.append({"role": "assistant", "content": full_reply})
 
 # 🔔 Updates Section
+# 🔔 Updates Section
 elif page == "🔔 Updates":
     st.title("🔔 Latest Updates")
 
-    if os.path.exists(EXCEL_FILE):
-        updates_df = pd.read_excel(EXCEL_FILE).tail(5)
-        st.write(updates_df)
+    st.write(f"🚀 **Current Version:** {CURRENT_VERSION}")
+    st.write("📢 **Update Details:** New version for this app!")
 
-        if st.button("🗑️ Clear Update History"):
-            os.remove(EXCEL_FILE)
-            os.remove(DISMISS_FILE)
-            st.success("✅ Update history cleared!")
+    if check_for_updates():
+        st.markdown("<h3 style='color:red;'>⚡ New Update Available!</h3>", unsafe_allow_html=True)
+
+        if st.button("✅ Dismiss Update Notification"):
+            dismiss_update()
             st.rerun()
-    else:
-        st.write("⚠️ No updates found.")
