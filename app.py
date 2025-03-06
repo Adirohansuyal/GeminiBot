@@ -20,7 +20,7 @@ if not API_KEY:
 genai.configure(api_key=API_KEY)
 
 # 📌 Version Management
-CURRENT_VERSION = "3.4.0"  # Update this when pushing new versions
+CURRENT_VERSION = "3.6.0"  # Update this when pushing new versions
 VERSION_FILE = "version.txt"
 EXCEL_FILE = "update_log.xlsx"
 DISMISS_FILE = "dismissed_update.txt"
@@ -114,7 +114,7 @@ if page == "🏠 Home":
     # 🚨 Flashing Update Message with Persistent Storage
     if check_for_updates():
         version_text = f"🚀 **Current Version:** {CURRENT_VERSION}"
-        update_text = "📢 **Update Details:** New Style sccss"
+        update_text = "📢 **Update Details:** New Style scs"
         
         message = f"⚡ **New Update Available!**\n\n{version_text}\n\n{update_text}"
         st.markdown(f"<h3 style='color:red;'>{message}</h3>", unsafe_allow_html=True)
