@@ -218,12 +218,16 @@ elif page == "💬 Chat with AI":
 elif page == "🔔 Updates":
     st.title("🔔 Latest Updates")
 
-    st.write(f"🚀 **Current Version:** {CURRENT_VERSION}")
-    st.write("📢 **Update Details: new style")
+    version_text = f"🚀 **Current Version:** {CURRENT_VERSION}"
+    update_text = "📢 **Update Details:** New Style updated"
 
     if check_for_updates():
-        st.markdown("<h3 style='color:red;'>⚡ New Update Available!</h3>", unsafe_allow_html=True)
+        message = f"⚡ **New Update Available!**\n\n{version_text}\n\n{update_text}"
+        st.markdown(f"<h3 style='color:red;'>{message}</h3>", unsafe_allow_html=True)
 
         if st.button("✅ Dismiss Update Notification"):
             dismiss_update()
             st.rerun()
+    else:
+        st.write(version_text)
+        st.write(update_text)
