@@ -20,7 +20,7 @@ if not API_KEY:
 genai.configure(api_key=API_KEY)
 
 # 📌 Version Management
-CURRENT_VERSION = "3.2.0"  # Update this when pushing new versions
+CURRENT_VERSION = "3.3.0"  # Update this when pushing new versions
 VERSION_FILE = "version.txt"
 EXCEL_FILE = "update_log.xlsx"
 DISMISS_FILE = "dismissed_update.txt"
@@ -219,7 +219,7 @@ elif page == "🔔 Updates":
     st.title("🔔 Latest Updates")
 
     st.write(f"🚀 **Current Version:** {CURRENT_VERSION}")
-    st.write("📢 **Update Details:** New version for this app!")
+    st.write("📢 **Update Details:nothing")
 
     if check_for_updates():
         st.markdown("<h3 style='color:red;'>⚡ New Update Available!</h3>", unsafe_allow_html=True)
