@@ -108,7 +108,7 @@ if page == "🏠 Home":
 
     st.markdown('<p style="color : orange; font-weight: bold;">🚀 Your AI-powered assistant for PDF processing, summarization, and Q&A.</p>', unsafe_allow_html=True)
 
-    st.markdown("\n\n")
+    st.markdown("\n\n\n\n")
     st.markdown("🔥 **RECENT UPDATES:**")
     st.markdown("**📌 Enhances the Background Image ✅**")
     st.markdown("**📌 Improved Chatbot Experience ✅**")
