@@ -114,7 +114,7 @@ if page == "🏠 Home":
     # 🚨 Flashing Update Message with Persistent Storage
     if check_for_updates():
         version_text = f"🚀 **Current Version:** {CURRENT_VERSION}"
-        update_text = "📢 **Update Details:** New"
+        update_text = "📢 **Update Details:** new verision installed"
         
         message = f"⚡ **New Update Available!**\n\n{version_text}\n\n{update_text}"
         st.markdown(f"<h3 style='color:red;'>{message}</h3>", unsafe_allow_html=True)
