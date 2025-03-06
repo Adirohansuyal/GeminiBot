@@ -45,7 +45,7 @@ def get_latest_update_details():
         df = pd.read_excel(EXCEL_FILE)
         if not df.empty:
             latest_row = df.iloc[-1]  # Get the last update details
-            return latest_row["Updatekjkhjkhsk"]
+            return latest_row["Updatekjkhj=sdsssk"]
     return "🔄 No updates available."
 
 
