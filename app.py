@@ -20,7 +20,7 @@ if not API_KEY:
 genai.configure(api_key=API_KEY)
 
 # 📌 Version Management
-CURRENT_VERSION = "2.1.0"  # Update this when pushing new versions
+CURRENT_VERSION = "2.2.0"  # Update this when pushing new versions
 VERSION_FILE = "version.txt"
 EXCEL_FILE = "update_log.xlsx"
 DISMISS_FILE = "dismissed_update.txt"
@@ -52,7 +52,7 @@ def log_version_update():
     """Logs the update details to an Excel file."""
     update_data = {
         "Version": [CURRENT_VERSION],
-        "Update Details": ["🚀🗑️ Clear Update History button added."],
+        "Update Details": ["🚀helo"],
     }
     df = pd.DataFrame(update_data)
 
