@@ -52,7 +52,7 @@ def log_version_update():
     """Logs the update details to an Excel file."""
     update_data = {
         "Version": [CURRENT_VERSION],
-        "Update Details": ["🚀helo"],
+        "Update Details": ["🚀 New features added."],
     }
     df = pd.DataFrame(update_data)
 
