@@ -20,7 +20,7 @@ if not API_KEY:
 genai.configure(api_key=API_KEY)
 
 # 📌 Version Management
-CURRENT_VERSION = "3.3.0"  # Update this when pushing new versions
+CURRENT_VERSION = "3.4.0"  # Update this when pushing new versions
 VERSION_FILE = "version.txt"
 EXCEL_FILE = "update_log.xlsx"
 DISMISS_FILE = "dismissed_update.txt"
