@@ -57,7 +57,8 @@ def log_version_update():
     """Log update details in an Excel file."""
     update_data = {
         "Version": [CURRENT_VERSION],
-        "Update Details": ["🚀 New data "],
+        "Update Details": ["🚀 New data and features added in version " + CURRENT_VERSION],
+        "Timestamp": [pd.Timestamp.now()]
     }
     df = pd.DataFrame(update_data)
 
