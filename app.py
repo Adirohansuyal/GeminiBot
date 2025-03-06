@@ -115,7 +115,7 @@ if page == "🏠 Home":
     st.title("Aerri AI - Your Personal AI Assistant")
 
     # Set Background Image (Ensure the file is in the same directory)
-    background_image_path = "orangebg.jpg"  # Change this to your image file name
+    background_image_path = "ai.jpeg"  # Change this to your image file name
     if os.path.exists(background_image_path):
         bg_image_style = f"""
         <style>
