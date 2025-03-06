@@ -42,10 +42,10 @@ def update_version_file():
     log_version_update()
 
 def log_version_update():
-    """Logs the update details to an Excel file."""
+    """Logs the update details to an Excel file (hidden from users)."""
     update_data = {
         "Version": [CURRENT_VERSION],
-        "Update Details": ["📢 Version 1.6.0 - Testing Updates3"]
+        "Update Details": ["🚀 Version 1.6.0 - Added Dark Mode & Fixed PDF Summarization"]
     }
     df = pd.DataFrame(update_data)
 
@@ -55,9 +55,9 @@ def log_version_update():
             df = pd.concat([existing_df, df], ignore_index=True)
 
         df.to_excel(EXCEL_FILE, index=False)
-        st.success(f"✅ Update log saved in {EXCEL_FILE}")
+        print(f"✅ Update log saved in {EXCEL_FILE}")  # Only visible in terminal/logs
     except Exception as e:
-        st.error(f"❌ Failed to save update log: {e}")
+        print(f"❌ Failed to save update log: {e}")  # Error message visible in terminal
 
 # 🎨 UI Styling
 st.markdown("""
