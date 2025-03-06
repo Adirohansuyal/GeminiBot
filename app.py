@@ -1,4 +1,6 @@
 import streamlit as st
+import base64
+
 import time
 import io
 import os
@@ -108,22 +110,34 @@ page = st.sidebar.radio("Go to", ["🏠 Home", "📄 PDF Processing", "💬 Chat
 
 # 🎯 Home Page
 # 🎯 Home Page
+# 🎯 Home Page
 if page == "🏠 Home":
-    st.title("Aerri AI 👾")
+    st.title("Aerri AI - Your Personal AI Assistant")
+
+    # Set Background Image (Ensure the file is in the same directory)
+    background_image_path = "orangebg.jpg"  # Change this to your image file name
+    if os.path.exists(background_image_path):
+        bg_image_style = f"""
+        <style>
+        .stApp {{
+            background: url("data:image/jpg;base64,{base64.b64encode(open(background_image_path, "rb").read()).decode()}") no-repeat center center fixed;
+            background-size: cover;
+        }}
+        </style>
+        """
+        st.markdown(bg_image_style, unsafe_allow_html=True)
 
     # 🚨 Flashing Update Message with Persistent Storage
     if check_for_updates():
         version_text = f"🚀 **Current Version:** {CURRENT_VERSION}"
-        update_text = "📢 **Update Details:** new verision installed"
-        
+        update_text = "📢 **Update Details:** New version installed"
+
         message = f"⚡ **New Update Available!**\n\n{version_text}\n\n{update_text}"
         st.markdown(f"<h3 style='color:red;'>{message}</h3>", unsafe_allow_html=True)
 
         if st.button("✅ Dismiss Update Notification"):
             dismiss_update()
             st.rerun()
-
-        update_version_file()  # Log update if it's new
 
     st.write("🚀 Your AI-powered assistant for PDF processing, summarization, and Q&A.")
 
