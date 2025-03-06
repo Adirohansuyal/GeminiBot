@@ -5,6 +5,7 @@ import os
 import fitz  # PyMuPDF for PDF text extraction
 import google.generativeai as genai
 import google.api_core.exceptions
+import pandas as pd
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.utils import simpleSplit
@@ -19,8 +20,9 @@ if not API_KEY:
 genai.configure(api_key=API_KEY)
 
 # 📌 Version Management
-CURRENT_VERSION = "1.1.0"  # Update this when pushing new versions
+CURRENT_VERSION = "1.2.0"  # Update this when pushing new versions
 VERSION_FILE = "version.txt"
+EXCEL_FILE = "update_log.xlsx"
 
 def check_for_updates():
     try:
@@ -28,12 +30,24 @@ def check_for_updates():
             last_version = f.read().strip()
     except FileNotFoundError:
         last_version = "0.0.0"
-
+    
     return last_version != CURRENT_VERSION
 
 def update_version_file():
     with open(VERSION_FILE, "w") as f:
         f.write(CURRENT_VERSION)
+
+    log_version_update()
+
+def log_version_update():
+    update_data = {"Version": [CURRENT_VERSION], "Update Details": ["📢 Version 1.2.0 - Enhancement of the UI and UX"]}
+    df = pd.DataFrame(update_data)
+
+    if os.path.exists(EXCEL_FILE):
+        existing_df = pd.read_excel(EXCEL_FILE)
+        df = pd.concat([existing_df, df], ignore_index=True)
+
+    df.to_excel(EXCEL_FILE, index=False)
 
 # 🎨 UI Styling
 st.markdown("""
@@ -62,29 +76,18 @@ page = st.sidebar.radio("Go to", ["🏠 Home", "📄 PDF Processing", "💬 Chat
 # 🎯 Home Page
 if page == "🏠 Home":
     st.title("Aerri AI 👾")
-    
+
     # 🚨 Flashing Update Message
     if check_for_updates():
-        for _ in range(1):  # Blink 5 times
+        for _ in range(1):
             st.markdown("<h3 style='color:red;'>⚡ New Update Available! [Check Updates]</h3>", unsafe_allow_html=True)
             time.sleep(0.5)
             st.markdown("")  # Clear the message
             time.sleep(0.5)
 
-        # Update version file so message doesn't show next time
         update_version_file()
 
     st.write("🚀 Your AI-powered assistant for PDF processing, summarization, and Q&A.")
-
-    st.markdown("""
-    **Features:**
-    - 📂 Upload PDFs and extract text
-    - 🤖 AI-powered text summarization
-    - 📌 Bullet-point summaries
-    - 🎤 Voice input for queries
-    - 💬 Interactive AI chatbot
-    - 📥 Download AI-generated summaries
-    """)
 
 # 📄 PDF Processing Page
 elif page == "📄 PDF Processing":
@@ -97,7 +100,7 @@ elif page == "📄 PDF Processing":
         doc = fitz.open(stream=pdf_bytes, filetype="pdf")
         return "\n".join([page.get_text("text") for page in doc])
 
-    def generate_pdf(content, filename="summary.pdf"):
+    def generate_pdf(content):
         pdf_buffer = io.BytesIO()
         c = canvas.Canvas(pdf_buffer, pagesize=letter)
         width, height = letter
@@ -119,52 +122,28 @@ elif page == "📄 PDF Processing":
         return pdf_buffer
 
     if uploaded_file:
-        with st.spinner("🔍 Extracting text..."):
-            pdf_text = extract_text_from_pdf(uploaded_file)
+        pdf_text = extract_text_from_pdf(uploaded_file)
 
         if pdf_text.strip():
-            with st.expander("📄 **View Extracted Text**", expanded=False):
-                st.text_area("PDF Content", pdf_text[:5000], height=300)
-
+            st.text_area("PDF Content", pdf_text[:5000], height=300)
+            
             summary_format = st.radio("Choose Summary Format:", ["📄 Paragraph", "📌 Bullet Points"], horizontal=True)
 
             try:
-                with st.spinner("🤖 Aerri AI is generating..."):
-                    model = genai.GenerativeModel("gemini-1.5-pro-latest")
-
-                    if summary_format == "📄 Paragraph":
-                        prompt = f"Summarize this text in a concise paragraph:\n\n{pdf_text[:8000]}"
-                    else:
-                        prompt = f"""
-                        Summarize this text in **bullet points**:
-                        - **Use concise sentences**
-                        - **Group related points together**
-                        - **Start each point with 📌**
-                        
-                        Text to summarize:
-                        {pdf_text[:8000]}
-                        """
-
-                    response = model.generate_content(prompt)
-                    summary = response.text
-
-            except google.api_core.exceptions.ResourceExhausted:
-                summary = "⚠️ Server Error. Please try again."
+                model = genai.GenerativeModel("gemini-1.5-pro-latest")
+                prompt = f"Summarize this text in {'a paragraph' if summary_format == '📄 Paragraph' else 'bullet points'}:\n\n{pdf_text[:8000]}"
+                response = model.generate_content(prompt)
+                summary = response.text
             except google.api_core.exceptions.GoogleAPIError:
-                summary = "⚠️ An error occurred. Try later."
+                summary = "⚠️ Error. Please try again."
 
             st.success("Summary Created!")
             st.markdown(summary.replace("\n", "\n\n"))
 
-            pdf_file = generate_pdf(summary, "summary.pdf")
-            st.download_button(
-                label="📥 Download Summary as PDF",
-                data=pdf_file,
-                file_name="summary.pdf",
-                mime="application/pdf"
-            )
+            pdf_file = generate_pdf(summary)
+            st.download_button("📥 Download Summary as PDF", data=pdf_file, file_name="summary.pdf", mime="application/pdf")
 
-# 💬 Chatbot Section
+# 💬 Chatbot Section with Typing Animation
 elif page == "💬 Chat with AI":
     st.title("💬 Chat with Aerri AI")
 
@@ -182,18 +161,26 @@ elif page == "💬 Chat with AI":
         with st.chat_message("user"):
             st.markdown(user_input)
 
-        try:
-            model = genai.GenerativeModel("gemini-1.5-pro-latest")
-            response = model.generate_content(user_input)
-            bot_reply = response.text
-        except google.api_core.exceptions.GoogleAPIError:
-            bot_reply = "⚠️ Error. Please try again."
-
-        st.session_state.messages.append({"role": "assistant", "content": bot_reply})
         with st.chat_message("assistant"):
-            st.markdown(bot_reply)
+            message_placeholder = st.empty()
+            full_reply = ""
+
+            try:
+                model = genai.GenerativeModel("gemini-1.5-pro-latest")
+                response = model.generate_content(user_input)
+                bot_reply = response.text
+            except google.api_core.exceptions.GoogleAPIError:
+                bot_reply = "⚠️ Error. Please try again."
+
+            for char in bot_reply:
+                full_reply += char
+                message_placeholder.markdown(full_reply + "▌")
+                time.sleep(0.02)
+
+            message_placeholder.markdown(full_reply)
+            st.session_state.messages.append({"role": "assistant", "content": full_reply})
 
 # 🔔 Updates Section
 elif page == "🔔 Updates":
     st.title("🔔 Latest Updates")
-    st.write("📢 Version 1.2.0 - Enhancement of the UI and UX")
+    st.write("📢 Version 1.2.0 - Added Tracking Updates for new versions")
