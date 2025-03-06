@@ -19,7 +19,7 @@ if not API_KEY:
 genai.configure(api_key=API_KEY)
 
 # 📌 Version Management
-CURRENT_VERSION = "1.1.0"  # Update this when pushing new versions
+CURRENT_VERSION = "1.2.0"  # Update this when pushing new versions
 VERSION_FILE = "version.txt"
 
 def check_for_updates():
@@ -61,7 +61,7 @@ page = st.sidebar.radio("Go to", ["🏠 Home", "📄 PDF Processing", "💬 Chat
 
 # 🎯 Home Page
 if page == "🏠 Home":
-    st.title("Aerri I 👾")
+    st.title("Aerri AI 👾")
     
     # 🚨 Flashing Update Message
     if check_for_updates():
