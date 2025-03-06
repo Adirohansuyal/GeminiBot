@@ -1,16 +1,14 @@
 import streamlit as st
 import base64
-
+import os
 import time
 import io
-import os
 import fitz  # PyMuPDF for PDF text extraction
 import google.generativeai as genai
 import google.api_core.exceptions
 import pandas as pd
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
-from reportlab.lib.utils import simpleSplit
 from dotenv import load_dotenv
 
 # 🔑 Load API Key
@@ -22,81 +20,63 @@ if not API_KEY:
 genai.configure(api_key=API_KEY)
 
 # 📌 Version Management
-CURRENT_VERSION = "4.0.0"  # Update this when pushing new versions
+CURRENT_VERSION = "4.0.0"
 VERSION_FILE = "version.txt"
-EXCEL_FILE = "update_log.xlsx"
 DISMISS_FILE = "dismissed_update.txt"
+EXCEL_FILE = "update_log.xlsx"
 
-def get_last_version():
-    """Retrieve the last stored version from the file."""
-    if os.path.exists(VERSION_FILE):
-        with open(VERSION_FILE, "r") as f:
+def get_stored_version(file):
+    """Retrieve the stored version from a file."""
+    if os.path.exists(file):
+        with open(file, "r") as f:
             return f.read().strip()
     return "0.0.0"
-
-def get_dismissed_version():
-    """Retrieve the last dismissed version."""
-    if os.path.exists(DISMISS_FILE):
-        with open(DISMISS_FILE, "r") as f:
-            return f.read().strip()
-    return "0.0.0"
-
-def check_for_updates():
-    """Check if a new update is available and if it has been dismissed."""
-    last_version = get_last_version()
-    dismissed_version = get_dismissed_version()
-
-    # If the last version is not the same as the current version, it's a new update
-    if last_version != CURRENT_VERSION:
-        update_version_file()  # ✅ Ensure updates are logged
-        return True
-
-    return dismissed_version != CURRENT_VERSION
-
 
 def update_version_file():
-    """Update the stored version file when an update is pushed."""
+    """Update the stored version when an update is detected."""
     with open(VERSION_FILE, "w") as f:
         f.write(CURRENT_VERSION)
-
     log_version_update()
 
 def log_version_update():
-    """Ensure update details are always stored correctly."""
-    update_data = {
-        "Version": [CURRENT_VERSION],
-        "Update Details": ["🚀 New "],
-    }
+    """Log version updates to an Excel file."""
+    update_data = {"Version": [CURRENT_VERSION], "Details": ["🚀 New Features"]}
     df = pd.DataFrame(update_data)
 
-    # ✅ Ensure the file always exists before writing
     if os.path.exists(EXCEL_FILE):
         existing_df = pd.read_excel(EXCEL_FILE)
         df = pd.concat([existing_df, df], ignore_index=True)
 
     df.to_excel(EXCEL_FILE, index=False)
 
+def check_for_updates():
+    """Check for new updates."""
+    last_version = get_stored_version(VERSION_FILE)
+    dismissed_version = get_stored_version(DISMISS_FILE)
+
+    if last_version != CURRENT_VERSION:
+        update_version_file()
+        return True
+    return dismissed_version != CURRENT_VERSION
 
 def dismiss_update():
-    """Mark the current update as dismissed."""
+    """Dismiss the current update notification."""
     with open(DISMISS_FILE, "w") as f:
         f.write(CURRENT_VERSION)
-
-
 
 # 🎨 UI Styling
 st.markdown("""
     <style>
         body, .main, .stApp { font-family: 'Arial', sans-serif; }
+        .stDownloadButton > button, .stButton > button {
+            background-color: #004d7a; color: white; border-radius: 5px;
+        }
         .sidebar .sidebar-content { background: linear-gradient(to right, #004d7a, #008793); color: white; }
-        .stDownloadButton > button { background-color: #008793; color: white; font-size: 14px; }
-        .stButton > button { background-color: #004d7a; color: white; border-radius: 5px; }
     </style>
 """, unsafe_allow_html=True)
 
-# 🌙 Theme Handling
-theme_choice = st.sidebar.toggle("🌙 Dark Mode", value=True)
-if theme_choice:
+# 🌙 Dark Mode
+if st.sidebar.toggle("🌙 Dark Mode", value=True):
     st.markdown("""
         <style>
             body, .main, .stApp { background: linear-gradient(to right, #000000, #434343); color: white !important; }
@@ -108,54 +88,49 @@ if theme_choice:
 st.sidebar.title("📂 Navigation")
 page = st.sidebar.radio("Go to", ["🏠 Home", "📄 PDF Processing", "💬 Chat with AI", "🔔 Updates"])
 
-# 🎯 Home Page
-# 🎯 Home Page
-# 🎯 Home Page
+# 🚀 Home Page
 if page == "🏠 Home":
     st.title("Aerri AI - Your Personal AI Assistant")
 
-    # Set Background Image (Ensure the file is in the same directory)
-    background_image_path = "ai.jpg"  # Change this to your image file name
+    # Set Background Image
+    background_image_path = "ai.jpg"
     if os.path.exists(background_image_path):
-        bg_image_style = f"""
-        <style>
-        .stApp {{
-            background: url("data:image/jpg;base64,{base64.b64encode(open(background_image_path, "rb").read()).decode()}") no-repeat center center fixed;
-            background-size: cover;
-        }}
-        </style>
-        """
-        st.markdown(bg_image_style, unsafe_allow_html=True)
+        with open(background_image_path, "rb") as img_file:
+            encoded_image = base64.b64encode(img_file.read()).decode()
+        st.markdown(f"""
+            <style>
+                .stApp {{
+                    background: url("data:image/jpg;base64,{encoded_image}") no-repeat center center fixed;
+                    background-size: cover;
+                }}
+            </style>
+        """, unsafe_allow_html=True)
 
-    # 🚨 Flashing Update Message with Persistent Storage
+    st.markdown('<p style="color : orange; font-weight: bold;">🚀 Your AI-powered assistant for PDF processing, summarization, and Q&A.</p>', unsafe_allow_html=True)
+
+
+    st.markdown("🔥 **Recent Updates:**")
+    st.markdown("**Enhances the Background Image**")
+    st.markdown("**Improved Chatbot Experience**")
+    st.markdown("**Added PDF Processing Feature**")
+
+
+    # 🚨 Update Notification
     if check_for_updates():
-        version_text = f"🚀 **Current Version:** {CURRENT_VERSION}"
-        update_text = "📢 **Update Details:** New version installed"
-
-        message = f"⚡ **New Update Available!**\n\n{version_text}\n\n{update_text}"
-        st.markdown(f"<h3 style='color:red;'>{message}</h3>", unsafe_allow_html=True)
-
+        st.markdown(f"<h3 style='color:red;'>⚡ New Update Available! (v{CURRENT_VERSION})</h3>", unsafe_allow_html=True)
         if st.button("✅ Dismiss Update Notification"):
             dismiss_update()
             st.rerun()
 
-    st.write("🚀 Your AI-powered assistant for PDF processing, summarization, and Q&A.")
-
-# 🔔 Updates Section
+# 🔔 Updates Page
 elif page == "🔔 Updates":
     st.title("🔔 Latest Updates")
-
-    version_text = f"🚀 **Current Version:** {CURRENT_VERSION}"
-
+    st.write(f"🚀 **Current Version:** {CURRENT_VERSION}")
     if check_for_updates():
         st.markdown("<h3 style='color:red;'>⚡ New Update Available!</h3>", unsafe_allow_html=True)
-
         if st.button("✅ Dismiss Update Notification"):
             dismiss_update()
             st.rerun()
-    else:
-        st.write(version_text)
-
 
 # 📄 PDF Processing Page
 elif page == "📄 PDF Processing":
@@ -164,20 +139,20 @@ elif page == "📄 PDF Processing":
     uploaded_file = st.file_uploader("📂 Upload a PDF file", type=["pdf"])
 
     def extract_text_from_pdf(pdf_file):
+        """Extract text from a PDF."""
         pdf_bytes = pdf_file.read()
         doc = fitz.open(stream=pdf_bytes, filetype="pdf")
         return "\n".join([page.get_text("text") for page in doc])
 
     def generate_pdf(content):
+        """Generate a PDF with summarized content."""
         pdf_buffer = io.BytesIO()
         c = canvas.Canvas(pdf_buffer, pagesize=letter)
         width, height = letter
         c.setFont("Helvetica", 12)
 
-        lines = simpleSplit(content, "Helvetica", 12, width - 100)
         y_position = height - 50
-
-        for line in lines:
+        for line in content.split("\n"):
             if y_position < 50:
                 c.showPage()
                 c.setFont("Helvetica", 12)
@@ -191,10 +166,9 @@ elif page == "📄 PDF Processing":
 
     if uploaded_file:
         pdf_text = extract_text_from_pdf(uploaded_file)
-
         if pdf_text.strip():
             st.text_area("PDF Content", pdf_text[:5000], height=300)
-            
+
             summary_format = st.radio("Choose Summary Format:", ["📄 Paragraph", "📌 Bullet Points"], horizontal=True)
 
             try:
@@ -211,7 +185,8 @@ elif page == "📄 PDF Processing":
             pdf_file = generate_pdf(summary)
             st.download_button("📥 Download Summary as PDF", data=pdf_file, file_name="summary.pdf", mime="application/pdf")
 
-# 💬 Chatbot Section
+# 💬 Chatbot Page
+# 💬 Chatbot Page
 elif page == "💬 Chat with AI":
     st.title("💬 Chat with Aerri AI")
 
@@ -231,7 +206,7 @@ elif page == "💬 Chat with AI":
 
         with st.chat_message("assistant"):
             message_placeholder = st.empty()
-            full_reply = ""
+            full_response = ""
 
             try:
                 model = genai.GenerativeModel("gemini-1.5-pro-latest")
@@ -240,29 +215,11 @@ elif page == "💬 Chat with AI":
             except google.api_core.exceptions.GoogleAPIError:
                 bot_reply = "⚠️ Error. Please try again."
 
+            # ⌨️ Typing Animation Effect
             for char in bot_reply:
-                full_reply += char
-                message_placeholder.markdown(full_reply + "▌")
-                time.sleep(0.02)
+                full_response += char
+                message_placeholder.markdown(full_response + "▌")
+                time.sleep(0.02)  # Simulating typing speed
 
-            message_placeholder.markdown(full_reply)
-            st.session_state.messages.append({"role": "assistant", "content": full_reply})
-
-# 🔔 Updates Section
-# 🔔 Updates Section
-elif page == "🔔 Updates":
-    st.title("🔔 Latest Updates")
-
-    version_text = f"🚀 **Current Version:** {CURRENT_VERSION}"
-    update_text = "📢 **Update Details:** New Style ccss"
-
-    if check_for_updates():
-        message = f"⚡ **New Update Availble!**\n\n{version_text}\n\n{update_text}"
-        st.markdown(f"<h3 style='color:red;'>{message}</h3>", unsafe_allow_html=True)
-
-        if st.button("✅ Dismiss Update Notification"):
-            dismiss_update()
-            st.rerun()
-    else:
-        st.write(version_text)
-        st.write(update_text)
+            message_placeholder.markdown(full_response)  # Final response without cursor
+            st.session_state.messages.append({"role": "assistant", "content": full_response})
