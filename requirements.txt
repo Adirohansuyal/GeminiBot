@@ -1,10 +1,7 @@
 streamlit
+PyMuPDF
 google-generativeai
-speechrecognition
-pillow
-pymupdf
-reportlab
 google-api-core
-python-dotenv
-openpyxl
 pandas
+reportlab
+python-dotenv
