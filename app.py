@@ -20,7 +20,7 @@ if not API_KEY:
 genai.configure(api_key=API_KEY)
 
 # 📌 Version Management
-CURRENT_VERSION = "1.4.0"  # Update this when pushing new versions
+CURRENT_VERSION = "1.5.0"  # Update this when pushing new versions
 VERSION_FILE = "version.txt"
 EXCEL_FILE = "update_log.xlsx"
 
@@ -183,4 +183,4 @@ elif page == "💬 Chat with AI":
 # 🔔 Updates Section
 elif page == "🔔 Updates":
     st.title("🔔 Latest Updates")
-    st.write("📢 Version 1.4.0 - Testing Updates")
+    st.write("📢 Version 1.5.0 - Testing Updates2")
