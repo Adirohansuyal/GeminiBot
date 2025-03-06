@@ -18,7 +18,7 @@ if not API_KEY:
 genai.configure(api_key=API_KEY)
 
 # 📌 Define App Version
-CURRENT_VERSION = "1.1.0"  # Change this when updating
+CURRENT_VERSION = "1.2.0"  # Change this when updating
 
 # 📂 File to Store Last Notified Version
 VERSION_FILE = "version.txt"
