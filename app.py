@@ -107,13 +107,18 @@ st.sidebar.title("📂 Navigation")
 page = st.sidebar.radio("Go to", ["🏠 Home", "📄 PDF Processing", "💬 Chat with AI", "🔔 Updates"])
 
 # 🎯 Home Page
+# 🎯 Home Page
 if page == "🏠 Home":
     st.title("Aerri AI 👾")
 
     # 🚨 Flashing Update Message with Persistent Storage
     if check_for_updates():
-        st.markdown("<h3 style='color:red;'>⚡ New Update Available! [Check Updates]</h3>", unsafe_allow_html=True)
+        version_text = f"🚀 **Current Version:** {CURRENT_VERSION}"
+        update_text = "📢 **Update Details:** New Style updated"
         
+        message = f"⚡ **New Update Available!**\n\n{version_text}\n\n{update_text}"
+        st.markdown(f"<h3 style='color:red;'>{message}</h3>", unsafe_allow_html=True)
+
         if st.button("✅ Dismiss Update Notification"):
             dismiss_update()
             st.rerun()
@@ -121,6 +126,22 @@ if page == "🏠 Home":
         update_version_file()  # Log update if it's new
 
     st.write("🚀 Your AI-powered assistant for PDF processing, summarization, and Q&A.")
+
+# 🔔 Updates Section
+elif page == "🔔 Updates":
+    st.title("🔔 Latest Updates")
+
+    version_text = f"🚀 **Current Version:** {CURRENT_VERSION}"
+
+    if check_for_updates():
+        st.markdown("<h3 style='color:red;'>⚡ New Update Available!</h3>", unsafe_allow_html=True)
+
+        if st.button("✅ Dismiss Update Notification"):
+            dismiss_update()
+            st.rerun()
+    else:
+        st.write(version_text)
+
 
 # 📄 PDF Processing Page
 elif page == "📄 PDF Processing":
