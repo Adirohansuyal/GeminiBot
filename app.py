@@ -20,13 +20,9 @@ if not API_KEY:
 genai.configure(api_key=API_KEY)
 
 # 📌 Version Management
-CURRENT_VERSION = "1.7.0"  # Update this when pushing new versions
-VERSION_FILE = ".hidden_data/version.txt"
-EXCEL_FILE = ".hidden_data/update_log.xlsx"
-
-# Ensure the hidden directory exists
-if not os.path.exists(".hidden_data"):
-    os.makedirs(".hidden_data")
+CURRENT_VERSION = "1.6.0"  # Update this when pushing new versions
+VERSION_FILE = "version.txt"
+EXCEL_FILE = "update_log.xlsx"
 
 def check_for_updates():
     """Checks if the current version is different from the last stored version."""
@@ -49,7 +45,7 @@ def log_version_update():
     """Logs the update details to an Excel file (hidden from users)."""
     update_data = {
         "Version": [CURRENT_VERSION],
-        "Update Details": ["🚀 Version 1.7.0 test2"]
+        "Update Details": ["🚀 Version 1.6.0 - test"]
     }
     df = pd.DataFrame(update_data)
 
@@ -198,11 +194,8 @@ elif page == "💬 Chat with AI":
 elif page == "🔔 Updates":
     st.title("🔔 Latest Updates")
     
-    if os.getenv("ADMIN_MODE") == "true":
-        if os.path.exists(EXCEL_FILE):
-            updates_df = pd.read_excel(EXCEL_FILE)
-            st.write(updates_df)
-        else:
-            st.write("⚠️ No updates found.")
+    if os.path.exists(EXCEL_FILE):
+        updates_df = pd.read_excel(EXCEL_FILE)
+        st.write(updates_df)
     else:
-        st.write("⚠️ No updates found.")  # Users won't see the log
+        st.write("⚠️ No updates found.")
