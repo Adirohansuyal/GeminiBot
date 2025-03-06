@@ -63,7 +63,7 @@ def log_version_update():
     """Ensure update details are always stored correctly."""
     update_data = {
         "Version": [CURRENT_VERSION],
-        "Update Details": ["🚀 New"],
+        "Update Details": ["🚀 New version"],
     }
     df = pd.DataFrame(update_data)
 
