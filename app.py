@@ -110,9 +110,9 @@ if page == "🏠 Home":
 
 
     st.markdown("🔥 **Recent Updates:**")
-    st.markdown("**Enhances the Background Image**")
-    st.markdown("**Improved Chatbot Experience**")
-    st.markdown("**Added PDF Processing Feature**")
+    st.markdown("**📌 Enhances the Background Image ✅**")
+    st.markdown("**📌 Improved Chatbot Experience ✅**")
+    st.markdown("**📌 Added PDF Processing Feature ✅**")
 
 
     # 🚨 Update Notification
