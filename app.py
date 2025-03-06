@@ -20,7 +20,7 @@ if not API_KEY:
 genai.configure(api_key=API_KEY)
 
 # 📌 Version Management
-CURRENT_VERSION = "3.0.0"  # Update this when pushing new versions
+CURRENT_VERSION = "3.2.0"  # Update this when pushing new versions
 VERSION_FILE = "version.txt"
 EXCEL_FILE = "update_log.xlsx"
 DISMISS_FILE = "dismissed_update.txt"
@@ -57,7 +57,7 @@ def log_version_update():
     """Log update details in an Excel file."""
     update_data = {
         "Version": [CURRENT_VERSION],
-        "Update Details": ["🚀 adisuyal909 " + CURRENT_VERSION],
+        "Update Details": ["🚀 adisal909 " + CURRENT_VERSION],
         "Timestamp": [pd.Timestamp.now()]
     }
     df = pd.DataFrame(update_data)
@@ -215,8 +215,10 @@ elif page == "🔔 Updates":
         st.write(updates_df)
 
         if st.button("🗑️ Clear Update History"):
-            os.remove(EXCEL_FILE)
-            os.remove(DISMISS_FILE)
+            if os.path.exists(EXCEL_FILE):
+                os.remove(EXCEL_FILE)
+            if os.path.exists(DISMISS_FILE):
+                os.remove(DISMISS_FILE)
             st.success("✅ Update history cleared!")
             st.rerun()
     else:
