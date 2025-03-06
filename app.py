@@ -20,7 +20,7 @@ if not API_KEY:
 genai.configure(api_key=API_KEY)
 
 # 📌 Version Management
-CURRENT_VERSION = "1.6.0"  # Update this when pushing new versions
+CURRENT_VERSION = "1.1.0"  # Update this when pushing new versions
 VERSION_FILE = "version.txt"
 EXCEL_FILE = "update_log.xlsx"
 
@@ -45,7 +45,7 @@ def log_version_update():
     """Logs the update details to an Excel file (hidden from users)."""
     update_data = {
         "Version": [CURRENT_VERSION],
-        "Update Details": ["🚀 Version 1.6.0 - test"]
+        "Update Details": ["🚀 Update the notification management"]
     }
     df = pd.DataFrame(update_data)
 
@@ -191,11 +191,25 @@ elif page == "💬 Chat with AI":
             st.session_state.messages.append({"role": "assistant", "content": full_reply})
 
 # 🔔 Updates Section
+# 🔔 Updates Section
 elif page == "🔔 Updates":
     st.title("🔔 Latest Updates")
-    
+
     if os.path.exists(EXCEL_FILE):
         updates_df = pd.read_excel(EXCEL_FILE)
-        st.write(updates_df)
+
+        # Show only the latest 5 updates
+        recent_updates = updates_df.tail(5)
+
+        st.write(recent_updates)
+
+        # 🗑️ Delete History Button
+        if st.button("🗑️ Clear Update History"):
+            try:
+                os.remove(EXCEL_FILE)  # Delete the file
+                st.success("✅ Update history cleared!")
+            except Exception as e:
+                st.error(f"⚠️ Error deleting update history: {e}")
+
     else:
         st.write("⚠️ No updates found.")
