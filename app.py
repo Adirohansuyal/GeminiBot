@@ -45,7 +45,7 @@ def log_version_update():
     """Logs the update details to an Excel file (hidden from users)."""
     update_data = {
         "Version": [CURRENT_VERSION],
-        "Update Details": ["🚀 Version 1.6.0 - Added Dark Mode & Fixed PDF Summarization"]
+        "Update Details": ["🚀 Version 1.6.0 - test"]
     }
     df = pd.DataFrame(update_data)
 
