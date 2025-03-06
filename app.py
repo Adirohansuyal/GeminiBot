@@ -65,7 +65,7 @@ if page == "🏠 Home":
     
     # 🚨 Flashing Update Message
     if check_for_updates():
-        for _ in range(5):  # Blink 5 times
+        for _ in range(1):  # Blink 5 times
             st.markdown("<h3 style='color:red;'>⚡ New Update Available! [Check Updates](#updates)</h3>", unsafe_allow_html=True)
             time.sleep(0.5)
             st.markdown("")  # Clear the message
@@ -165,7 +165,7 @@ elif page == "📄 PDF Processing":
             )
 
 # 💬 Chatbot Section
-elif page == "💬 Chat with AI":
+elif page == "💬 Chat with Ai":
     st.title("💬 Chat with Aerri AI")
 
     if "messages" not in st.session_state:
