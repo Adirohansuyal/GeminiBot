@@ -20,7 +20,7 @@ if not API_KEY:
 genai.configure(api_key=API_KEY)
 
 # 📌 Version Management
-CURRENT_VERSION = "3.9.0"  # Update this when pushing new versions
+CURRENT_VERSION = "4.9.0"  # Update this when pushing new versions
 VERSION_FILE = "version.txt"
 EXCEL_FILE = "update_log.xlsx"
 DISMISS_FILE = "dismissed_update.txt"
@@ -45,7 +45,7 @@ def get_latest_update_details():
         df = pd.read_excel(EXCEL_FILE)
         if not df.empty:
             latest_row = df.iloc[-1]  # Get the last update details
-            return latest_row["Updatekjkhj=sdsssk"]
+            return latest_row["Unew"]
     return "🔄 No updates available."
 
 
