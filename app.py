@@ -25,50 +25,54 @@ VERSION_FILE = "version.txt"
 EXCEL_FILE = "update_log.xlsx"
 DISMISS_FILE = "dismissed_update.txt"
 
+def get_last_version():
+    """Retrieve the last stored version from the file."""
+    if os.path.exists(VERSION_FILE):
+        with open(VERSION_FILE, "r") as f:
+            return f.read().strip()
+    return "0.0.0"
+
+def get_dismissed_version():
+    """Retrieve the last dismissed version."""
+    if os.path.exists(DISMISS_FILE):
+        with open(DISMISS_FILE, "r") as f:
+            return f.read().strip()
+    return "0.0.0"
+
 def check_for_updates():
     """Check if a new update is available and if it has been dismissed."""
-    try:
-        with open(VERSION_FILE, "r") as f:
-            last_version = f.read().strip()
-    except FileNotFoundError:
-        last_version = "0.0.0"
-
-    try:
-        with open(DISMISS_FILE, "r") as f:
-            dismissed_version = f.read().strip()
-    except FileNotFoundError:
-        dismissed_version = "0.0.0"
+    last_version = get_last_version()
+    dismissed_version = get_dismissed_version()
 
     return last_version != CURRENT_VERSION and dismissed_version != CURRENT_VERSION
 
 def update_version_file():
-    """Updates the version file and logs the update."""
+    """Update the stored version file when an update is pushed."""
     with open(VERSION_FILE, "w") as f:
         f.write(CURRENT_VERSION)
 
     log_version_update()
 
 def log_version_update():
-    """Logs the update details to an Excel file."""
+    """Log update details in an Excel file."""
     update_data = {
         "Version": [CURRENT_VERSION],
-        "Update Details": ["🚀 New "],
+        "Update Details": ["🚀 New features added."],
     }
     df = pd.DataFrame(update_data)
 
-    try:
-        if os.path.exists(EXCEL_FILE):
-            existing_df = pd.read_excel(EXCEL_FILE)
-            df = pd.concat([existing_df, df], ignore_index=True)
+    if os.path.exists(EXCEL_FILE):
+        existing_df = pd.read_excel(EXCEL_FILE)
+        df = pd.concat([existing_df, df], ignore_index=True)
 
-        df.to_excel(EXCEL_FILE, index=False)
-    except Exception as e:
-        print(f"❌ Failed to save update log: {e}")
+    df.to_excel(EXCEL_FILE, index=False)
 
 def dismiss_update():
     """Mark the current update as dismissed."""
     with open(DISMISS_FILE, "w") as f:
         f.write(CURRENT_VERSION)
+
+
 
 # 🎨 UI Styling
 st.markdown("""
