@@ -23,16 +23,23 @@ genai.configure(api_key=API_KEY)
 CURRENT_VERSION = "2.1.0"  # Update this when pushing new versions
 VERSION_FILE = "version.txt"
 EXCEL_FILE = "update_log.xlsx"
+DISMISS_FILE = "dismissed_update.txt"
 
 def check_for_updates():
-    """Checks if the current version is different from the last stored version."""
+    """Check if a new update is available and if it has been dismissed."""
     try:
         with open(VERSION_FILE, "r") as f:
             last_version = f.read().strip()
     except FileNotFoundError:
         last_version = "0.0.0"
-    
-    return last_version != CURRENT_VERSION
+
+    try:
+        with open(DISMISS_FILE, "r") as f:
+            dismissed_version = f.read().strip()
+    except FileNotFoundError:
+        dismissed_version = "0.0.0"
+
+    return last_version != CURRENT_VERSION and dismissed_version != CURRENT_VERSION
 
 def update_version_file():
     """Updates the version file and logs the update."""
@@ -42,7 +49,7 @@ def update_version_file():
     log_version_update()
 
 def log_version_update():
-    """Logs the update details to an Excel file (hidden from users)."""
+    """Logs the update details to an Excel file."""
     update_data = {
         "Version": [CURRENT_VERSION],
         "Update Details": ["🚀🗑️ Clear Update History button added."],
@@ -55,9 +62,13 @@ def log_version_update():
             df = pd.concat([existing_df, df], ignore_index=True)
 
         df.to_excel(EXCEL_FILE, index=False)
-        print(f"✅ Update log saved in {EXCEL_FILE}")  # Only visible in terminal/logs
     except Exception as e:
-        print(f"❌ Failed to save update log: {e}")  # Error message visible in terminal
+        print(f"❌ Failed to save update log: {e}")
+
+def dismiss_update():
+    """Mark the current update as dismissed."""
+    with open(DISMISS_FILE, "w") as f:
+        f.write(CURRENT_VERSION)
 
 # 🎨 UI Styling
 st.markdown("""
@@ -87,15 +98,15 @@ page = st.sidebar.radio("Go to", ["🏠 Home", "📄 PDF Processing", "💬 Chat
 if page == "🏠 Home":
     st.title("Aerri AI 👾")
 
-    # 🚨 Flashing Update Message
+    # 🚨 Flashing Update Message with Persistent Storage
     if check_for_updates():
-        for _ in range(1):
-            st.markdown("<h3 style='color:red;'>⚡ New Update Available! [Check Updates]</h3>", unsafe_allow_html=True)
-            time.sleep(0.5)
-            st.markdown("")  # Clear the message
-            time.sleep(0.5)
+        st.markdown("<h3 style='color:red;'>⚡ New Update Available! [Check Updates]</h3>", unsafe_allow_html=True)
+        
+        if st.button("✅ Dismiss Update Notification"):
+            dismiss_update()
+            st.rerun()
 
-        update_version_file()
+        update_version_file()  # Log update if it's new
 
     st.write("🚀 Your AI-powered assistant for PDF processing, summarization, and Q&A.")
 
@@ -153,7 +164,7 @@ elif page == "📄 PDF Processing":
             pdf_file = generate_pdf(summary)
             st.download_button("📥 Download Summary as PDF", data=pdf_file, file_name="summary.pdf", mime="application/pdf")
 
-# 💬 Chatbot Section with Typing Animation
+# 💬 Chatbot Section
 elif page == "💬 Chat with AI":
     st.title("💬 Chat with Aerri AI")
 
@@ -191,25 +202,17 @@ elif page == "💬 Chat with AI":
             st.session_state.messages.append({"role": "assistant", "content": full_reply})
 
 # 🔔 Updates Section
-# 🔔 Updates Section
 elif page == "🔔 Updates":
     st.title("🔔 Latest Updates")
 
     if os.path.exists(EXCEL_FILE):
-        updates_df = pd.read_excel(EXCEL_FILE)
+        updates_df = pd.read_excel(EXCEL_FILE).tail(5)
+        st.write(updates_df)
 
-        # Show only the latest 5 updates
-        recent_updates = updates_df.tail(5)
-
-        st.write(recent_updates)
-
-        # 🗑️ Delete History Button
         if st.button("🗑️ Clear Update History"):
-            try:
-                os.remove(EXCEL_FILE)  # Delete the file
-                st.success("✅ Update history cleared!")
-            except Exception as e:
-                st.error(f"⚠️ Error deleting update history: {e}")
-
+            os.remove(EXCEL_FILE)
+            os.remove(DISMISS_FILE)
+            st.success("✅ Update history cleared!")
+            st.rerun()
     else:
         st.write("⚠️ No updates found.")
