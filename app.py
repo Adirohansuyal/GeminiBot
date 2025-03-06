@@ -196,4 +196,4 @@ elif page == "💬 Chat with AI":
 # 🔔 Updates Section
 elif page == "🔔 Updates":
     st.title("🔔 Latest Updates")
-    st.write("📢 Version 1.2.0 - Added Security Update")
+    st.write("📢 Version 1.2.0 - Enhancement of the UI and UX")
