@@ -20,11 +20,12 @@ if not API_KEY:
 genai.configure(api_key=API_KEY)
 
 # 📌 Version Management
-CURRENT_VERSION = "1.5.0"  # Update this when pushing new versions
+CURRENT_VERSION = "1.6.0"  # Update this when pushing new versions
 VERSION_FILE = "version.txt"
 EXCEL_FILE = "update_log.xlsx"
 
 def check_for_updates():
+    """Checks if the current version is different from the last stored version."""
     try:
         with open(VERSION_FILE, "r") as f:
             last_version = f.read().strip()
@@ -34,20 +35,29 @@ def check_for_updates():
     return last_version != CURRENT_VERSION
 
 def update_version_file():
+    """Updates the version file and logs the update."""
     with open(VERSION_FILE, "w") as f:
         f.write(CURRENT_VERSION)
 
     log_version_update()
 
 def log_version_update():
-    update_data = {"Version": [CURRENT_VERSION], "Update Details": ["📢 Version 1.2.0 - Enhancement of the UI and UX"]}
+    """Logs the update details to an Excel file."""
+    update_data = {
+        "Version": [CURRENT_VERSION],
+        "Update Details": ["📢 Version 1.6.0 - Testing Updates3"]
+    }
     df = pd.DataFrame(update_data)
 
-    if os.path.exists(EXCEL_FILE):
-        existing_df = pd.read_excel(EXCEL_FILE)
-        df = pd.concat([existing_df, df], ignore_index=True)
+    try:
+        if os.path.exists(EXCEL_FILE):
+            existing_df = pd.read_excel(EXCEL_FILE)
+            df = pd.concat([existing_df, df], ignore_index=True)
 
-    df.to_excel(EXCEL_FILE, index=False)
+        df.to_excel(EXCEL_FILE, index=False)
+        st.success(f"✅ Update log saved in {EXCEL_FILE}")
+    except Exception as e:
+        st.error(f"❌ Failed to save update log: {e}")
 
 # 🎨 UI Styling
 st.markdown("""
@@ -183,4 +193,9 @@ elif page == "💬 Chat with AI":
 # 🔔 Updates Section
 elif page == "🔔 Updates":
     st.title("🔔 Latest Updates")
-    st.write("📢 Version 1.5.0 - Testing Updates2")
+    
+    if os.path.exists(EXCEL_FILE):
+        updates_df = pd.read_excel(EXCEL_FILE)
+        st.write(updates_df)
+    else:
+        st.write("⚠️ No updates found.")
