@@ -44,12 +44,13 @@ def check_for_updates():
     last_version = get_last_version()
     dismissed_version = get_dismissed_version()
 
-    # If the last version is not the same as the current version, it's a new update
+    # Ensure updates persist across sessions until dismissed
     if last_version != CURRENT_VERSION:
-        update_version_file()  # ✅ Ensure updates are logged
-        return True
+        update_version_file()  # ✅ Log the new version
+        return True  # Always show update if the version changes
 
-    return dismissed_version != CURRENT_VERSION
+    return dismissed_version != CURRENT_VERSION  # Only dismiss when user clicks
+
 
 
 def update_version_file():
@@ -108,6 +109,7 @@ page = st.sidebar.radio("Go to", ["🏠 Home", "📄 PDF Processing", "💬 Chat
 
 # 🎯 Home Page
 # 🎯 Home Page
+# 🎯 Home Page
 if page == "🏠 Home":
     st.title("Aerri AI 👾")
 
@@ -115,13 +117,14 @@ if page == "🏠 Home":
     if check_for_updates():
         version_text = f"🚀 **Current Version:** {CURRENT_VERSION}"
         update_text = "📢 **Update Details:** New"
-        
+
         message = f"⚡ **New Update Available!**\n\n{version_text}\n\n{update_text}"
         st.markdown(f"<h3 style='color:red;'>{message}</h3>", unsafe_allow_html=True)
 
         if st.button("✅ Dismiss Update Notification"):
             dismiss_update()
             st.rerun()
+
 
         update_version_file()  # Log update if it's new
 
