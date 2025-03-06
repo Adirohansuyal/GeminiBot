@@ -45,7 +45,7 @@ def log_version_update():
     """Logs the update details to an Excel file (hidden from users)."""
     update_data = {
         "Version": [CURRENT_VERSION],
-        "Update Details": ["🚀 Update the notification management"]
+        "Update Details": ["🚀 Welcome to Aerri AI, All updates will be logged here."],
     }
     df = pd.DataFrame(update_data)
 
