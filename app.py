@@ -222,7 +222,7 @@ elif page == "🔔 Updates":
     update_text = "📢 **Update Details:** New Style updated"
 
     if check_for_updates():
-        message = f"⚡ **New Update Available!**\n\n{version_text}\n\n{update_text}"
+        message = f"⚡ **New Update Availble!**\n\n{version_text}\n\n{update_text}"
         st.markdown(f"<h3 style='color:red;'>{message}</h3>", unsafe_allow_html=True)
 
         if st.button("✅ Dismiss Update Notification"):
