@@ -20,7 +20,7 @@ if not API_KEY:
 genai.configure(api_key=API_KEY)
 
 # 📌 Version Management
-CURRENT_VERSION = "3.8.0"  # Update this when pushing new versions
+CURRENT_VERSION = "3.9.0"  # Update this when pushing new versions
 VERSION_FILE = "version.txt"
 EXCEL_FILE = "update_log.xlsx"
 DISMISS_FILE = "dismissed_update.txt"
@@ -39,10 +39,15 @@ def get_dismissed_version():
             return f.read().strip()
     return "0.0.0"
 
-def check_for_updates():
-    """Check if a new update is available and if it has been dismissed."""
-    last_version = get_last_version()
-    dismissed_version = get_dismissed_version()
+def get_latest_update_details():
+    """Fetch the latest update details from the update log."""
+    if os.path.exists(EXCEL_FILE):
+        df = pd.read_excel(EXCEL_FILE)
+        if not df.empty:
+            latest_row = df.iloc[-1]  # Get the last update details
+            return latest_row["Updatekjkhjkhsk"]
+    return "🔄 No updates available."
+
 
     # Ensure updates persist across sessions until dismissed
     if last_version != CURRENT_VERSION:
@@ -64,9 +69,13 @@ def log_version_update():
     """Ensure update details are always stored correctly."""
     update_data = {
         "Version": [CURRENT_VERSION],
-        "Update Details": ["🚀 New version for this app"],
+        "Update Details": ["📢 New update: Enhanced UI and bug fixes"],  # Modify this for new updates
     }
     df = pd.DataFrame(update_data)
+
+    # ✅ Always overwrite the file to ensure correct update details
+    df.to_excel(EXCEL_FILE, index=False)
+
 
     # ✅ Ensure the file always exists before writing
     if os.path.exists(EXCEL_FILE):
@@ -110,13 +119,15 @@ page = st.sidebar.radio("Go to", ["🏠 Home", "📄 PDF Processing", "💬 Chat
 # 🎯 Home Page
 # 🎯 Home Page
 # 🎯 Home Page
+# 🎯 Home Page
 if page == "🏠 Home":
     st.title("Aerri AI 👾")
 
     # 🚨 Flashing Update Message with Persistent Storage
-    if check_for_updates():
+    if log_version_update():
+        latest_update_details = get_latest_update_details()
         version_text = f"🚀 **Current Version:** {CURRENT_VERSION}"
-        update_text = "📢 **Update Details:** Neeeeew"
+        update_text = f"📢 **Update Details:** {latest_update_details}"  # Dynamically fetched
 
         message = f"⚡ **New Update Available!**\n\n{version_text}\n\n{update_text}"
         st.markdown(f"<h3 style='color:red;'>{message}</h3>", unsafe_allow_html=True)
@@ -124,6 +135,7 @@ if page == "🏠 Home":
         if st.button("✅ Dismiss Update Notification"):
             dismiss_update()
             st.rerun()
+
 
 
         update_version_file()  # Log update if it's new
@@ -136,7 +148,7 @@ elif page == "🔔 Updates":
 
     version_text = f"🚀 **Current Version:** {CURRENT_VERSION}"
 
-    if check_for_updates():
+    if ():
         st.markdown("<h3 style='color:red;'>⚡ New Update Available!</h3>", unsafe_allow_html=True)
 
         if st.button("✅ Dismiss Update Notification"):
@@ -245,7 +257,7 @@ elif page == "🔔 Updates":
     version_text = f"🚀 **Current Version:** {CURRENT_VERSION}"
     update_text = "📢 **Update Details:** New Style ccss"
 
-    if check_for_updates():
+    if get_latest_update_details():
         message = f"⚡ **New Update Availble!**\n\n{version_text}\n\n{update_text}"
         st.markdown(f"<h3 style='color:red;'>{message}</h3>", unsafe_allow_html=True)
 
