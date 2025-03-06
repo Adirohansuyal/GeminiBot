@@ -14,7 +14,7 @@ genai.configure(api_key="AIzaSyDzX9W_XsaJOGDH0xnqesMEQJiBMILm0q4")
 
 # 🌙 Theme State Handling
 if "theme" not in st.session_state:
-    st.session_state.theme = "light"  # Default theme
+    st.session_state.theme = "dark"  # Default theme
 
 # 🎨 Theme Selection in Sidebar
 st.sidebar.title("🎨 Theme Selection")
