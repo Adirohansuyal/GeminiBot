@@ -5,207 +5,183 @@ from reportlab.lib.utils import simpleSplit
 import io
 import google.generativeai as genai
 import google.api_core.exceptions
-import speech_recognition as sr
-from PIL import Image
 import fitz  # PyMuPDF for PDF text extraction
+from dotenv import load_dotenv
+import os
+import time  # For chatbot typing effect
 
-# 🔑 Configure API Key
-genai.configure(api_key="AIzaSyDzX9W_XsaJOGDH0xnqesMEQJiBMILm0q4")
+# 🔑 Load API Key
+load_dotenv()
+API_KEY = os.getenv("GOOGLE_API_KEY")
+if not API_KEY:
+    raise ValueError("API Key is missing! Set GOOGLE_API_KEY in .env")
 
-# 🌙 Theme State Handling
-if "theme" not in st.session_state:
-    st.session_state.theme = "dark"  # Default theme
+genai.configure(api_key=API_KEY)
 
-# 🎨 Theme Selection in Sidebar
-st.sidebar.title("🎨 Theme Selection")
-if st.sidebar.button("🌞 Light Theme"):
-    st.session_state.theme = "light"
-if st.sidebar.button("🌙 Dark Theme"):
-    st.session_state.theme = "dark"
+# 🎨 UI Styling
+st.markdown("""
+    <style>
+        body, .main, .stApp { font-family: 'Arial', sans-serif; }
+        .sidebar .sidebar-content { background: linear-gradient(to right, #004d7a, #008793); color: white; }
+        .stDownloadButton > button { background-color: #008793; color: white; font-size: 14px; }
+        .stButton > button { background-color: #004d7a; color: white; border-radius: 5px; }
+    </style>
+""", unsafe_allow_html=True)
 
-# 🎨 Apply Theme Styling
-if st.session_state.theme == "dark":
+# 🌙 Theme Handling
+theme_choice = st.sidebar.toggle("🌙 Dark Mode", value=True)
+if theme_choice:
     st.markdown("""
         <style>
             body, .main, .stApp { background: linear-gradient(to right, #000000, #434343); color: white !important; }
             h1, h2, h3, p, .stMarkdown { color: white !important; }
         </style>
     """, unsafe_allow_html=True)
-else:
+
+# 🎨 Sidebar Navigation (Updated)
+st.sidebar.title("📂 Navigation")
+page = st.sidebar.radio("Go to", ["🏠 Home", "📄 PDF Processing", "💬 Chat with AI", "🆕 Updates"])
+
+# 🎯 Home Page
+if page == "🏠 Home":
+    st.title("Aerri AI 👾")
+    st.write("🚀 Your AI-powered assistant for PDF processing, summarization, and Q&A.")
+    
     st.markdown("""
-        <style>
-            body, .main, .stApp { background: linear-gradient(to right, #cbe8f8, #aee1fc); color: black !important; }
-            h1, h2, h3, p, .stMarkdown { color: black !important; }
-        </style>
-    """, unsafe_allow_html=True)
+    **Features:**
+    - 📂 Upload PDFs and extract text
+    - 🤖 AI-powered text summarization
+    - 📌 Bullet-point summaries
+    - 🎤 Voice input for queries (Coming Soon!)
+    - 💬 Interactive AI chatbot
+    - 📥 Download AI-generated summaries
+    """)
 
-# 🎨 Streamlit UI
-st.title("Aerri AI 👾")
-st.write("Ask me anything or upload a PDF to Aerri AI")
+# 📄 PDF Processing Page
+elif page == "📄 PDF Processing":
+    st.title("📂 PDF Processing")
+    
+    uploaded_file = st.file_uploader("📂 Upload a PDF file", type=["pdf"])
 
-# 📄 PDF File Upload
-uploaded_file = st.file_uploader("📂 Upload a PDF file", type=["pdf"])
+    def extract_text_from_pdf(pdf_file):
+        pdf_bytes = pdf_file.read()
+        doc = fitz.open(stream=pdf_bytes, filetype="pdf")
+        return "\n".join([page.get_text("text") for page in doc])
 
-# 📜 Function to Extract Text from PDF
-def extract_text_from_pdf(pdf_file):
-    doc = fitz.open(stream=pdf_file.read(), filetype="pdf")
-    text = "\n".join([page.get_text("text") for page in doc])
-    return text
+    def generate_pdf(content, filename="summary.pdf"):
+        pdf_buffer = io.BytesIO()
+        c = canvas.Canvas(pdf_buffer, pagesize=letter)
+        width, height = letter
+        c.setFont("Helvetica", 12)
 
-# 📄 Function to Generate PDF
-def generate_pdf(content, filename="summary.pdf"):
-    pdf_buffer = io.BytesIO()
-    c = canvas.Canvas(pdf_buffer, pagesize=letter)
-    width, height = letter
-    c.setFont("Helvetica", 12)
+        lines = simpleSplit(content, "Helvetica", 12, width - 100)
+        y_position = height - 50
 
-    lines = simpleSplit(content, "Helvetica", 12, width - 100)  # Auto-wrap text
-    y_position = height - 50  # Start position for text
+        for line in lines:
+            if y_position < 50:
+                c.showPage()
+                c.setFont("Helvetica", 12)
+                y_position = height - 50
+            c.drawString(50, y_position, line)
+            y_position -= 20
 
-    for line in lines:
-        if y_position < 50:  # If text reaches bottom, create a new page
-            c.showPage()
-            c.setFont("Helvetica", 12)
-            y_position = height - 50
-        c.drawString(50, y_position, line)
-        y_position -= 20  # Move to next line
+        c.save()
+        pdf_buffer.seek(0)
+        return pdf_buffer
 
-    c.save()
-    pdf_buffer.seek(0)  # Reset buffer position
-    return pdf_buffer
+    if uploaded_file:
+        with st.spinner("🔍 Extracting text..."):
+            pdf_text = extract_text_from_pdf(uploaded_file)
 
-# 🟢 If PDF is uploaded, extract and display text
-if uploaded_file:
-    with st.spinner("🔍 Extracting text..."):
-        pdf_text = extract_text_from_pdf(uploaded_file)
+        if pdf_text.strip():
+            with st.expander("📄 **View Extracted Text**", expanded=False):
+                st.text_area("PDF Content", pdf_text[:5000], height=300)
 
-    if pdf_text.strip():
-        st.subheader("📄 Extracted Text")
-        st.text_area("PDF Content", pdf_text[:2000], height=300)
+            summary_format = st.radio("Choose Summary Format:", ["📄 Paragraph", "📌 Bullet Points"], horizontal=True)
 
-        # 🤖 AI-Powered Summary
+            try:
+                with st.spinner("🤖 Aerri AI is generating..."):
+                    model = genai.GenerativeModel("gemini-1.5-pro-latest")
+                    prompt = f"Summarize this text:\n\n{pdf_text[:8000]}" if summary_format == "📄 Paragraph" else f"""
+                    Summarize this text in **bullet points**:
+                    - Use **📌** or **🔹** at the start.
+                    - Keep sentences **clear and concise**.
+                    - Format key sections in **bold**.
+
+                    Text to summarize:
+                    {pdf_text[:8000]}
+                    """
+                    response = model.generate_content(prompt)
+                    summary = response.text
+            except google.api_core.exceptions.ResourceExhausted:
+                summary = "⚠️ Can't Connect to the Server, Please relaunch the app."
+            except google.api_core.exceptions.GoogleAPIError:
+                summary = "⚠️ An error occurred. Please try again later."
+
+            st.success("Summary Created!")
+            st.markdown(summary.replace("\n", "\n\n") if summary_format == "📌 Bullet Points" else summary)
+
+            pdf_file = generate_pdf(summary, "summary.pdf")
+            st.download_button(label="📥 Download Summary as PDF", data=pdf_file, file_name="summary.pdf", mime="application/pdf")
+
+# 💬 Chatbot Section
+elif page == "💬 Chat with AI":
+    st.title("💬 Chat with Aerri AI")
+
+    if "messages" not in st.session_state:
+        st.session_state.messages = []
+
+    for msg in st.session_state.messages:
+        with st.chat_message(msg["role"]):
+            st.markdown(msg["content"])
+
+    user_input = st.chat_input("💬 Type your message...")
+
+    if user_input:
+        st.session_state.messages.append({"role": "user", "content": user_input})
+        with st.chat_message("user"):
+            st.markdown(user_input)
+
         try:
-            with st.spinner("🤖 Aerri AI is generating..."):
-                model = genai.GenerativeModel("gemini-1.5-pro-latest")
-                response = model.generate_content(f"Summarize this text:\n\n{pdf_text[:8000]}")
-                summary = response.text
+            model = genai.GenerativeModel("gemini-1.5-pro-latest")
+            response = model.generate_content([msg["content"] for msg in st.session_state.messages[-5:]])
+            bot_reply = response.text
+
+            st.session_state.messages.append({"role": "assistant", "content": bot_reply})
+
+            with st.chat_message("assistant"):
+                response_placeholder = st.empty()
+                full_reply = ""
+                for char in bot_reply:
+                    full_reply += char
+                    time.sleep(0.02)  # Typing effect
+                    response_placeholder.markdown(full_reply)
+
         except google.api_core.exceptions.ResourceExhausted:
-            summary = "⚠️ Can't Connect to the Server, Please relaunch the app."
+            bot_reply = "⚠️ Can't Connect to the Server, Please try again."
         except google.api_core.exceptions.GoogleAPIError:
-            summary = "⚠️ An error occurred. Please try again later."
+            bot_reply = "⚠️ An error occurred. Please try again later."
 
-        st.subheader("📌 AI-Generated Summary")
-        st.success("Summary Created!")
-        st.write(summary)
+    if st.button("🗑️ Clear Chat"):
+        st.session_state.messages = []
+        st.rerun()
 
-        # 📥 Download AI-Generated Summary as PDF
-        pdf_file = generate_pdf(summary, "summary.pdf")
-        st.download_button(
-            label="📥 Download Summary as PDF",
-            data=pdf_file,
-            file_name="summary.pdf",
-            mime="application/pdf"
-        )
+# 🆕 Updates Section
+elif page == "🆕 Updates":
+    st.title("🆕 Latest Updates")
+    st.write("📢 Stay informed about the latest features and improvements!")
 
-        # ❓ User Question Input
-        question = st.text_input("💬 Ask a question about the document:")
+    st.markdown("""
+    ## 🚀 **Latest Features & Improvements**  
+    - ✅ **New Bullet-Point AI Summaries** for better readability  
+    - ✅ **Smooth Typing Effect in Chatbot** for a more natural experience  
+    - ✅ **Download AI Summaries as PDFs**  
+    - ✅ **Dark Mode Support** for a sleek look  
 
-        # 📌 Bullet Summary Button
-        if st.button("📌 Generate Bullet Summary"):
-            try:
-                with st.spinner("🤖 Generating Bullet Summary..."):
-                    bullet_summary_prompt = f"Summarize the following text into bullet points:\n\n{pdf_text[:8000]}"
-                    bullet_response = model.generate_content(bullet_summary_prompt)
-                    bullet_summary = bullet_response.text
-            except google.api_core.exceptions.ResourceExhausted:
-                bullet_summary = "⚠️ Can't Connect to the Server, Please try again."
-            except google.api_core.exceptions.GoogleAPIError:
-                bullet_summary = "⚠️ An error occurred. Please try again later."
+    ## 🔜 **Upcoming Features**  
+    - 🔹 **Voice Input for Chatbot**  
+    - 🔹 **Image & Table Extraction from PDFs**  
+    - 🔹 **Customizable AI Summarization Settings**  
 
-            st.subheader("📌 Bullet-Point Summary")
-            st.write(bullet_summary)
-
-            # 📥 Download Bullet Summary as PDF
-            pdf_file_bullet = generate_pdf(bullet_summary, "bullet_summary.pdf")
-            st.download_button(
-                label="📥 Download Bullet Summary as PDF",
-                data=pdf_file_bullet,
-                file_name="bullet_summary.pdf",
-                mime="application/pdf"
-            )
-
-        # 🎤 **Voice Input Feature**
-        def recognize_speech():
-            r = sr.Recognizer()
-            with sr.Microphone() as source:
-                st.info("🎙️ Speak now...")
-                audio = r.listen(source)
-                try:
-                    return r.recognize_google(audio)
-                except sr.UnknownValueError:
-                    return "Could not understand audio"
-                except sr.RequestError:
-                    return "Error with the recognition service"
-
-        # 🔊 Store voice question in session state
-        if "voice_question" not in st.session_state:
-            st.session_state.voice_question = ""
-
-        if st.button("🎤 Ask with Voice"):
-            st.session_state.voice_question = recognize_speech()
-
-        # Display the voice input text
-        question = st.text_input("Your Question:", st.session_state.voice_question)
-
-        # 🤖 AI Response for Question
-        if question:
-            try:
-                with st.spinner("🤖 Thinking..."):
-                    response = model.generate_content(f"Based on the document:\n\n{pdf_text}\n\nAnswer this question: {question}")
-                    answer = response.text
-            except google.api_core.exceptions.ResourceExhausted:
-                answer = "⚠️ Can't Connect to the Server, Please try again."
-            except google.api_core.exceptions.GoogleAPIError:
-                answer = "⚠️ An error occurred. Please try again later."
-
-            st.subheader("🤖 AI Answer:")
-            st.write(answer)
-    else:
-        st.error("No text found in the PDF. Try another file!")
-
-# 🗨️ **AI Chatbot Section**
-
-# 🔄 Initialize Chat History
-if "messages" not in st.session_state:
-    st.session_state.messages = []
-
-# 📌 Display Chat History
-for msg in st.session_state.messages:
-    with st.chat_message(msg["role"]):
-        st.markdown(msg["content"])
-
-# 💬 User Chat Input
-user_input = st.chat_input("💬 Type your message...")
-
-if user_input:
-    st.session_state.messages.append({"role": "user", "content": user_input})
-    with st.chat_message("user"):
-        st.markdown(user_input)
-
-    # 🤖 AI Response
-    try:
-        response = model.generate_content([msg["content"] for msg in st.session_state.messages])
-        bot_reply = response.text
-    except google.api_core.exceptions.ResourceExhausted:
-        bot_reply = "⚠️ Can't Connect to the Server, Please try again."
-    except google.api_core.exceptions.GoogleAPIError:
-        bot_reply = "⚠️ An error occurred. Please try again later."
-
-    st.session_state.messages.append({"role": "assistant", "content": bot_reply})
-    with st.chat_message("assistant"):
-        st.markdown(bot_reply)
-
-# 🗑️ Clear Chat Button
-if st.button("🗑️ Clear Chat"):
-    st.session_state.messages = []
-    st.rerun()
+    Stay tuned for more updates! 🎉  
+    """)
