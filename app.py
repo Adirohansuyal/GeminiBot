@@ -20,7 +20,7 @@ if not API_KEY:
 genai.configure(api_key=API_KEY)
 
 # 📌 Version Management
-CURRENT_VERSION = "3.4.0"  # Update this when pushing new versions
+CURRENT_VERSION = "2.5.0"  # Update this when pushing new versions
 VERSION_FILE = "version.txt"
 EXCEL_FILE = "update_log.xlsx"
 DISMISS_FILE = "dismissed_update.txt"
@@ -44,7 +44,13 @@ def check_for_updates():
     last_version = get_last_version()
     dismissed_version = get_dismissed_version()
 
-    return last_version != CURRENT_VERSION and dismissed_version != CURRENT_VERSION
+    # If the last version is not the same as the current version, it's a new update
+    if last_version != CURRENT_VERSION:
+        update_version_file()  # ✅ Ensure updates are logged
+        return True
+
+    return dismissed_version != CURRENT_VERSION
+
 
 def update_version_file():
     """Update the stored version file when an update is pushed."""
@@ -54,19 +60,20 @@ def update_version_file():
     log_version_update()
 
 def log_version_update():
-    """Log update details in an Excel file."""
+    """Ensure update details are always stored correctly."""
     update_data = {
         "Version": [CURRENT_VERSION],
-        "Update Details": ["🚀 adisal909 " + CURRENT_VERSION],
-        "Timestamp": [pd.Timestamp.now()]
+        "Update Details": ["🚀 New features and improvements"],
     }
     df = pd.DataFrame(update_data)
 
+    # ✅ Ensure the file always exists before writing
     if os.path.exists(EXCEL_FILE):
         existing_df = pd.read_excel(EXCEL_FILE)
         df = pd.concat([existing_df, df], ignore_index=True)
 
     df.to_excel(EXCEL_FILE, index=False)
+
 
 def dismiss_update():
     """Mark the current update as dismissed."""
@@ -215,10 +222,8 @@ elif page == "🔔 Updates":
         st.write(updates_df)
 
         if st.button("🗑️ Clear Update History"):
-            if os.path.exists(EXCEL_FILE):
-                os.remove(EXCEL_FILE)
-            if os.path.exists(DISMISS_FILE):
-                os.remove(DISMISS_FILE)
+            os.remove(EXCEL_FILE)
+            os.remove(DISMISS_FILE)
             st.success("✅ Update history cleared!")
             st.rerun()
     else:
