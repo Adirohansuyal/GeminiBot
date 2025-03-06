@@ -6,3 +6,5 @@ pymupdf
 reportlab
 google-api-core
 python-dotenv
+openpyxl
+pandas
