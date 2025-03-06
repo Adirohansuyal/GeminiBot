@@ -109,7 +109,7 @@ page = st.sidebar.radio("Go to", ["🏠 Home", "📄 PDF Processing", "💬 Chat
 # 🎯 Home Page
 # 🎯 Home Page
 if page == "🏠 Home":
-    st.title("Aerri A 👾")
+    st.title("Aerri AI 👾")
 
     # 🚨 Flashing Update Message with Persistent Storage
     if check_for_updates():
