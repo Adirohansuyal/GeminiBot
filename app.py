@@ -134,6 +134,9 @@ elif page == "🔔 Updates":
             st.rerun()
 
 # 📄 PDF Processing Page
+# 📄 PDF Processing Page
+# 📄 PDF Processing Page
+# 📄 PDF Processing Page
 elif page == "📄 PDF Processing":
     st.title("📂 PDF Processing")
 
@@ -168,23 +171,64 @@ elif page == "📄 PDF Processing":
     if uploaded_file:
         pdf_text = extract_text_from_pdf(uploaded_file)
         if pdf_text.strip():
-            st.text_area("PDF Content", pdf_text[:5000], height=300)
+            st.session_state["pdf_text"] = pdf_text  # Store in session state
+            st.text_area("📜 PDF Content", pdf_text[:5000], height=300)
 
-            summary_format = st.radio("Choose Summary Format:", ["📄 Paragraph", "📌 Bullet Points"], horizontal=True)
+            # 📝 Choose Summary Length
+            summary_length = st.selectbox("📏 Choose Summary Length:", ["Short", "Medium", "Long"])
+
+            # 📌 Choose Summary Format
+            summary_format = st.radio("📄 Choose Summary Format:", ["📄 Paragraph", "📌 Bullet Points"], horizontal=True)
+
+            # 🔄 Define Summary Length Limits
+            length_limits = {"Short": 500, "Medium": 1000, "Long": 2000}
 
             try:
                 model = genai.GenerativeModel("gemini-1.5-pro-latest")
-                prompt = f"Summarize this text in {'a paragraph' if summary_format == '📄 Paragraph' else 'bullet points'}:\n\n{pdf_text[:8000]}"
+                prompt = f"Summarize this text in {'a paragraph' if summary_format == '📄 Paragraph' else 'bullet points'}, keeping it {summary_length.lower()} (around {length_limits[summary_length]} words):\n\n{pdf_text[:8000]}"
                 response = model.generate_content(prompt)
                 summary = response.text
             except google.api_core.exceptions.GoogleAPIError:
                 summary = "⚠️ Error. Please try again."
 
-            st.success("Summary Created!")
+            st.success(f"✅ {summary_length} Summary Created!")
             st.markdown(summary.replace("\n", "\n\n"))
 
+            # 📥 Generate & Download Summary PDF
             pdf_file = generate_pdf(summary)
             st.download_button("📥 Download Summary as PDF", data=pdf_file, file_name="summary.pdf", mime="application/pdf")
+
+            # 📌 **Question Suggestions for Chatbot**
+            st.markdown("### ❓ Suggested Questions")
+            suggested_questions = [
+                "What is the main topic of this document?",
+                "Summarize the key findings in this PDF.",
+                "Are there any important statistics or data points?",
+                "What conclusions are drawn in this document?",
+                "List the key points discussed.",
+            ]
+
+            # Show suggested questions as buttons
+            for question in suggested_questions:
+                if st.button(question):
+                    st.session_state["pdf_question"] = question
+
+            # 📌 **Ask a Custom Question Section**
+            if "ask_question" not in st.session_state:
+                st.session_state["ask_question"] = False
+
+            if st.button("💬 Ask a Question"):
+                st.session_state["ask_question"] = True
+
+            if st.session_state["ask_question"]:
+                user_question = st.text_input("🔍 Type your question here:")
+                if user_question:
+                    try:
+                        prompt = f"Based on the following PDF content, answer this question:\n\nPDF Content:\n{pdf_text[:8000]}\n\nQuestion: {user_question}"
+                        response = model.generate_content(prompt)
+                        st.markdown(f"**🤖 Answer:**\n{response.text}")
+                    except google.api_core.exceptions.GoogleAPIError:
+                        st.error("⚠️ Error fetching response. Please try again.")
 
 # 💬 Chatbot Page
 # 💬 Chatbot Page
