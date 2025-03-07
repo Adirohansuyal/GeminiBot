@@ -20,7 +20,7 @@ if not API_KEY:
 genai.configure(api_key=API_KEY)
 
 # 📌 Version Management
-CURRENT_VERSION = "4.3.0"
+CURRENT_VERSION = "4.4.0 w.e.f 7 March 2025"
 VERSION_FILE = "version.txt"
 DISMISS_FILE = "dismissed_update.txt"
 EXCEL_FILE = "update_log.xlsx"
@@ -76,7 +76,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # 🌙 Dark Mode
-if st.sidebar.toggle("☀️ Light", value=True):
+if st.sidebar.toggle("☀️ Light Mode", value=True):
     st.markdown("""
         <style>
             body, .main, .stApp { background: linear-gradient(to right, #000000, #434343); color: white !important; }
