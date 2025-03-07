@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 
 # 🔑 Load API Key
 load_dotenv()
-API_KEY = "AIzaSyD_A-7X0Pkm0SUVv-9zjM5_OnQgt__WjE0"
+API_KEY = "AIzaSyCsdPQECMIlJpwrY9imR2Z2cjmL_ueCt7k"
 if not API_KEY:
     raise ValueError("API Key is missing! Set GOOGLE_API_KEY in .env")
 
