@@ -13,14 +13,14 @@ from dotenv import load_dotenv
 
 # 🔑 Load API Key
 load_dotenv()
-API_KEY = "AIzaSyBZrGAAtMom72UmWZvPsdjmgNbSqIPfx_k"
+API_KEY = "AIzaSyB_dWktJovtRo_uej_NJSAV0wfUQ0D8ITI"
 if not API_KEY:
     raise ValueError("API Key is missing! Set GOOGLE_API_KEY in .env")
 
 genai.configure(api_key=API_KEY)
 
 # 📌 Version Management
-CURRENT_VERSION = "4.2.0"
+CURRENT_VERSION = "4.3.0"
 VERSION_FILE = "version.txt"
 DISMISS_FILE = "dismissed_update.txt"
 EXCEL_FILE = "update_log.xlsx"
@@ -76,7 +76,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # 🌙 Dark Mode
-if st.sidebar.toggle("🌙 Dark Mode", value=True):
+if st.sidebar.toggle("☀️ Light", value=True):
     st.markdown("""
         <style>
             body, .main, .stApp { background: linear-gradient(to right, #000000, #434343); color: white !important; }
@@ -111,7 +111,7 @@ if page == "🏠 Home":
     st.markdown("\n\n")
     st.markdown("\n\n")
     st.markdown("🔥 **RECENT UPDATES:**")
-    st.markdown("**📌 Enhances the Background Image ✅**")
+    st.markdown("**📌 Resolved Error of blank pdf ✅**")
     st.markdown("**📌 Improved Chatbot Experience ✅**")
     st.markdown("**📌 Added PDF Processing Feature ✅**")
 
