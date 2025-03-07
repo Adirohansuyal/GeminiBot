@@ -20,7 +20,7 @@ if not API_KEY:
 genai.configure(api_key=API_KEY)
 
 # 📌 Version Management
-CURRENT_VERSION = "4.1.0"
+CURRENT_VERSION = "4.2.0"
 VERSION_FILE = "version.txt"
 DISMISS_FILE = "dismissed_update.txt"
 EXCEL_FILE = "update_log.xlsx"
