@@ -31,6 +31,26 @@ This AI-powered solution **optimizes workflow efficiency** by enabling users to:
 📌 **Interact via voice commands for a hands-free experience.**  
 📌 **Access the tool via both web and native applications for maximum flexibility.**  
 
+
+
+Aerri AI Image Search is a Streamlit-powered web application that enables users to search and download high-quality images from the Pexels API. The application also leverages AI-powered captioning using a pre-trained BLIP (Bootstrapping Language-Image Pre-training) model to generate meaningful captions for images.
+
+## 🚀 Features
+
+- **Image Search:** Fetches high-quality images from the Pexels API based on user queries.
+- **AI-Powered Captions:** Uses the Salesforce BLIP model to generate captions for images.
+- **Favorites Management:** Allows users to save and manage favorite images.
+- **Bulk Download:** Users can download all favorite images as a ZIP file.
+- **Custom Styling:** Dark-themed UI with interactive components for a seamless experience.
+
+## 🛠 Tech Stack
+
+- **Frontend:** [Streamlit](https://streamlit.io/)
+- **API:** [Pexels API](https://www.pexels.com/api/)
+- **AI Model:** [Salesforce BLIP](https://huggingface.co/Salesforce/blip-image-captioning-base)
+- **Backend Processing:** Python, PIL (Pillow), Requests, Transformers
+
+
 ---
 
 💡 **Excited to explore further applications of AI in document intelligence!**  
