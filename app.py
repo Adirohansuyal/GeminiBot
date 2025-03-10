@@ -123,9 +123,9 @@ if page == "🏠 Home":
     st.markdown("\n\n")
     st.markdown("\n\n")
     st.markdown("🔥 **RECENT UPDATES:**")
-    st.markdown("**📌 Resolved Error of blank pdf ✅**")
-    st.markdown("**📌 Improved Chatbot Experience ✅**")
-    st.markdown("**📌 Added PDF Processing Feature ✅**")
+    st.markdown("**📌 PDF Upload & Text Extraction and Downloadable PDF Feature ✅**")
+    st.markdown("**📌 Image Upload & Analysis ✅**")
+    st.markdown("**📌 Language Detection & Translation using Google Translator ✅**")
 
     # 🚨 Update Notification
     if check_for_updates():
