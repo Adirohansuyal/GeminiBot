@@ -221,24 +221,62 @@ elif page == " 🛠️Detection and Translation Tool":
                 st.write("**Answer:**", answer)
 
         elif file_type == "application/pdf":
-            st.subheader("📜 PDF Text Extraction")
-            pdf_bytes = uploaded_file.read()
-            extracted_text = extract_text_from_pdf(pdf_bytes) or extract_text_from_scanned_pdf(BytesIO(pdf_bytes))
+          st.subheader("📜 PDF Text Extraction")
+    pdf_bytes = uploaded_file.read()
+    extracted_text = extract_text_from_pdf(pdf_bytes) or extract_text_from_scanned_pdf(BytesIO(pdf_bytes))
 
-            if extracted_text:
-                detected_language = detect(extracted_text)
-                st.write(f"**Detected Language:** {Language.make(language=detected_language).display_name()}")
+    if extracted_text:
+        detected_language = detect(extracted_text)
+        st.write(f"**Detected Language:** {Language.make(language=detected_language).display_name()}")
 
-                language_choices = get_language_choices()
-                target_language = st.selectbox("Select target language for translation:", list(language_choices.keys()))
+        language_choices = get_language_choices()
+        target_language = st.selectbox("Select target language for translation:", list(language_choices.keys()))
 
-                if target_language != Language.make(language=detected_language).display_name():
-                    translated_text = GoogleTranslator(source=detected_language, target=language_choices[target_language]).translate(extracted_text)
-                    st.text_area("Translated Text", translated_text, height=300)
-                else:
-                    st.text_area("Extracted Text", extracted_text, height=300)
-            else:
-                st.warning("Could not extract text from the PDF. Try another file.")
+        if target_language != Language.make(language=detected_language).display_name():
+            translated_text = GoogleTranslator(source=detected_language, target=language_choices[target_language]).translate(extracted_text)
+            st.text_area("Translated Text", translated_text, height=300)
+            text_to_download = translated_text
+        else:
+            st.text_area("Extracted Text", extracted_text, height=300)
+            text_to_download = extracted_text
+
+        # Function to create a downloadable PDF
+        def create_pdf(text):
+            from io import BytesIO
+            from reportlab.lib.pagesizes import letter
+            from reportlab.pdfgen import canvas
+
+            buffer = BytesIO()
+            pdf_canvas = canvas.Canvas(buffer, pagesize=letter)
+            pdf_canvas.setFont("Helvetica", 12)
+
+            lines = text.split("\n")
+            y = 750  
+
+            for line in lines:
+                if y < 50:  
+                    pdf_canvas.showPage()
+                    pdf_canvas.setFont("Helvetica", 12)
+                    y = 750
+                pdf_canvas.drawString(50, y, line)
+                y -= 20  
+
+            pdf_canvas.save()
+            buffer.seek(0)
+            return buffer
+
+        # Generate PDF and provide download button
+        pdf_buffer = create_pdf(text_to_download)
+        st.download_button(
+            label="📥 Download as PDF",
+            data=pdf_buffer,
+            file_name="extracted_text.pdf",
+            mime="application/pdf"
+        )
+
+    else:
+        st.warning("Could not extract text from the PDF. Try another file.")
+
 
 # 🔔 Updates Page
 elif page == "🔔 Updates":
