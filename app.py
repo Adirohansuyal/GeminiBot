@@ -122,7 +122,7 @@ if page == "🏠 Home":
 
     st.markdown("\n\n")
     st.markdown("\n\n")
-    st.markdown("🔥 **RECENT UPDATES:**")
+    st.markdown("🔥 **RECENT UPDATES (Lastly Updated on 10 March 2025):**")
     st.markdown("**📌 PDF Upload & Text Extraction and Downloadable PDF Feature ✅**")
     st.markdown("**📌 Image Upload & Analysis ✅**")
     st.markdown("**📌 Language Detection & Translation using Google Translator ✅**")
