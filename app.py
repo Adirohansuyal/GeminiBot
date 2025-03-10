@@ -23,7 +23,7 @@ if not API_KEY:
 genai.configure(api_key=API_KEY)
 
 # 📌 Version Management
-CURRENT_VERSION = "4.6.0" \
+CURRENT_VERSION = "4.7.0" \
 " w.e.f 10 March 2025"
 VERSION_FILE = "version.txt"
 DISMISS_FILE = "dismissed_update.txt"
@@ -44,7 +44,7 @@ def update_version_file():
 
 def log_version_update():
     """Log version updates to an Excel file."""
-    update_data = {"Version": [CURRENT_VERSION], "Details": ["Updating to the latest version."]}
+    update_data = {"Version": [CURRENT_VERSION], "Details": ["Updating to the latest version of this app."]}
     df = pd.DataFrame(update_data)
 
     if os.path.exists(EXCEL_FILE):
