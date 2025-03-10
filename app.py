@@ -183,7 +183,7 @@ elif page == "Aerri AI Image Search 📸":
 # 🖼️ Image Filters
     col1, col2 = st.columns(2)
     with col1:
-        num_images = st.slider("Number of images:", 5, 20, 10)
+        num_images = st.slider("Number of images:", 0, 5, 10)
     with col2:
         orientation = st.selectbox("Image Orientation:", ["All", "Landscape", "Portrait", "Square"])
 
