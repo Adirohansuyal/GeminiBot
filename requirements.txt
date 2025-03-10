@@ -17,4 +17,5 @@ torch
 transformers
 pandas
 openpyxl
+requests
 

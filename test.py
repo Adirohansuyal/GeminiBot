@@ -1,104 +1,149 @@
-import fitz  # PyMuPDF
-import pytesseract
-from pdf2image import convert_from_bytes
-from langdetect import detect
-from io import BytesIO
-from gtts import gTTS
-from fpdf import FPDF
-from langcodes import Language
-from deep_translator import GoogleTranslator
 import streamlit as st
-from PIL import Image
-import torch
+import zipfile
+import requests
 from transformers import BlipProcessor, BlipForConditionalGeneration
+from PIL import Image
+from io import BytesIO
 
-st.title("📄 PDF & Image Analysis Tool")
+# 🔑 Replace this with your actual API key
+PEXELS_API_KEY = "HUEEXguBPn0FmAJbQyI4JBLcq20PjZw5r4zIfwusEH2KtWOuXsmxvsQm"
+PEXELS_API_URL = "https://api.pexels.com/v1/search"
 
-uploaded_file = st.file_uploader("Upload a PDF or an Image", type=["pdf", "jpeg", "jpg", "png"])
+# 🎨 Page Configuration
+st.set_page_config(page_title="Aerri AI Image Search", layout="wide")
 
-# Load AI models for image description & question answering
-processor = BlipProcessor.from_pretrained("Salesforce/blip-image-captioning-base")
-description_model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-captioning-base")
-vqa_model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-vqa-base")
+# 🌟 Custom Background and Styling
+st.markdown(
+    """
+    <style>
+    [data-testid="stAppViewContainer"] { background: linear-gradient(to right, #141E30, #243B55); }
+    [data-testid="stMarkdownContainer"], .stTextInput, .stRadio, .stSlider, label { color: #ffffff !important; }
+    .stTextInput>div>div>input { color: #ffffff !important; background-color: #1e2a38 !important; border-radius: 8px; padding: 5px; caret-color: #00ffff !important; border: 1px solid #00ffff; }
+    h1, h2, h3, h4, h5, h6 { color: #00ffff !important; }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
 
-# Language selection for descriptions
-description_language = st.selectbox("Select description language:", ["English", "Hindi"])
+st.title("📸 Aerri AI Image Search")
+st.write("🔍 Find high-quality images with AI-powered captions!")
 
-# Function to generate an image description
-def generate_image_description(image, lang="English"):
-    """Generate a detailed description of an image using BLIP model and translate if needed."""
-    image = image.convert("RGB")  # Ensure image is in RGB format
-    inputs = processor(images=image, return_tensors="pt")
-    output = description_model.generate(**inputs, max_length=150)
-    description = processor.batch_decode(output, skip_special_tokens=True)[0]
+# 🎯 Quick Search Categories
+categories = ["Nature", "Animals", "Technology", "Travel", "Food"]
+selected_category = st.radio("Quick Categories:", categories, horizontal=True)
+
+# 🔍 User Search Input
+query = st.text_input("Enter a search term:", selected_category)
+
+# 🖼️ Image Filters
+col1, col2 = st.columns(2)
+with col1:
+    num_images = st.slider("Number of images:", 5, 20, 10)
+with col2:
+    orientation = st.selectbox("Image Orientation:", ["All", "Landscape", "Portrait", "Square"])
+
+# 📥 Fetch Images from Pexels API
+def fetch_images(query, per_page=10, orientation=None):
+    headers = {"Authorization": PEXELS_API_KEY}
+    params = {"query": query, "per_page": per_page}
     
-    if lang != "English":
-        description = GoogleTranslator(source="en", target=lang.lower()).translate(description)
+    if orientation and orientation != "All":
+        params["orientation"] = orientation.lower()
+
+    response = requests.get(PEXELS_API_URL, headers=headers, params=params)
     
-    return description
+    if response.status_code == 200:
+        return response.json().get("photos", [])
+    else:
+        st.error("❌ Failed to fetch images. Please check your API key.")
+        return []
 
-# Function to answer a question about an image
-def answer_image_question(image, question):
-    """Answer a user question about the image using the VQA model."""
-    image = image.convert("RGB")
-    inputs = processor(images=image, text=question, return_tensors="pt")
-    output = vqa_model.generate(**inputs, max_length=50)
-    answer = processor.batch_decode(output, skip_special_tokens=True)[0]
-    return answer
+# 🤖 AI Captioning Setup
+MODEL_NAME = "Salesforce/blip-image-captioning-base"
+processor = BlipProcessor.from_pretrained(MODEL_NAME)
+model = BlipForConditionalGeneration.from_pretrained(MODEL_NAME)
 
-# Function to extract text from a normal PDF
-def extract_text_from_pdf(pdf_bytes):
-    pdf_document = fitz.open(stream=pdf_bytes, filetype="pdf")
-    text = "".join([page.get_text("text") for page in pdf_document])
-    return text.strip()
-
-# Function to extract text from a scanned PDF using OCR
-def extract_text_from_scanned_pdf(pdf_bytes):
-    images = convert_from_bytes(pdf_bytes.read())
-    text = "".join([pytesseract.image_to_string(img) for img in images])
-    return text.strip()
-
-# Function to get a list of supported language names
-def get_language_choices():
-    language_codes = GoogleTranslator().get_supported_languages()
-    return {Language.make(language=code).display_name(): code for code in language_codes}
-
-if uploaded_file is not None:
-    file_type = uploaded_file.type
-
-    if file_type in ["image/jpeg", "image/jpg", "image/png"]:
-        image = Image.open(uploaded_file)
-        st.image(image, caption="Uploaded Image", use_column_width=True)
-
-        # **Generate Image Description**
-        st.subheader("🖼️ Image Analysis & Description")
-        description = generate_image_description(image, lang=description_language)
-        st.write("**Detailed Description:**", description)
-
-        # **Ask Questions About the Image**
-        st.subheader("❓ Ask a Question About the Image")
-        user_question = st.text_input("Enter your question:")
-
-        if user_question:
-            answer = answer_image_question(image, user_question)
-            st.write("**Answer:**", answer)
+# 🔥 Function to Generate AI Captions
+def generate_caption(image_url):
+    response = requests.get(image_url)
+    image = Image.open(BytesIO(response.content)).convert("RGB")
     
-    elif file_type == "application/pdf":
-        st.subheader("📜 PDF Text Extraction")
-        pdf_bytes = uploaded_file.read()
-        extracted_text = extract_text_from_pdf(pdf_bytes) or extract_text_from_scanned_pdf(BytesIO(pdf_bytes))
-        
-        if extracted_text:
-            detected_language = detect(extracted_text)
-            st.write(f"**Detected Language:** {Language.make(language=detected_language).display_name()}")
-            
-            language_choices = get_language_choices()
-            target_language = st.selectbox("Select target language for translation:", list(language_choices.keys()))
-            
-            if target_language != Language.make(language=detected_language).display_name():
-                translated_text = GoogleTranslator(source=detected_language, target=language_choices[target_language]).translate(extracted_text)
-                st.text_area("Translated Text", translated_text, height=300)
-            else:
-                st.text_area("Extracted Text", extracted_text, height=300)
-        else:
-            st.warning("Could not extract text from the PDF. Try another file.")
+    inputs = processor(image, return_tensors="pt")
+    caption_ids = model.generate(**inputs)
+    caption = processor.batch_decode(caption_ids, skip_special_tokens=True)[0]
+
+    return caption
+
+# ⭐ Favorites Feature
+if "favorites" not in st.session_state:
+    st.session_state.favorites = []
+
+def add_to_favorites(photo):
+    if photo not in st.session_state.favorites:
+        st.session_state.favorites.append(photo)
+        st.success("Added to favorites!")
+
+def remove_from_favorites(photo):
+    if photo in st.session_state.favorites:
+        st.session_state.favorites.remove(photo)
+        st.warning("Removed from favorites.")
+def download_favorites_as_zip():
+    if not st.session_state.favorites:
+        st.error("No favorites to download!")
+        return None
+    
+    zip_buffer = BytesIO()
+    with zipfile.ZipFile(zip_buffer, "w") as zip_file:
+        for index, fav in enumerate(st.session_state.favorites):
+            image_url = fav["src"]["original"]
+            image_data = requests.get(image_url).content
+            zip_file.writestr(f"image_{index + 1}.jpg", image_data)
+    
+    zip_buffer.seek(0)
+    return zip_buffer
+
+# 🔄 Load More Button
+if "page" not in st.session_state:
+    st.session_state.page = 1
+
+if st.button("🔍 Search") or st.session_state.page > 1:
+    st.session_state.page += 1
+    photos = fetch_images(query, per_page=num_images, orientation=orientation)
+
+    if photos:
+        cols = st.columns(4)
+        for index, photo in enumerate(photos):
+            with cols[index % 4]:
+                st.image(photo["src"]["medium"], caption=photo["photographer"], use_container_width=True)
+
+                # 🔥 Generate AI Caption
+                with st.spinner("Generating AI caption... 🤖"):
+                    caption = generate_caption(photo["src"]["original"])
+                st.write(f"📝 **AI Caption:** {caption}")
+
+                st.markdown(f"[🔗 View HD]({photo['src']['original']})", unsafe_allow_html=True)
+                
+                # ⭐ Favorite Button
+                if st.button("⭐ Add to Favorites", key=f"fav_{photo['id']}"):
+                    add_to_favorites(photo)
+
+                # ⬇ Download Button
+                image_data = requests.get(photo["src"]["original"]).content
+                st.download_button("📥 Download", image_data, file_name=f"{photo['id']}.jpg", mime="image/jpeg", key=f"download_{photo['id']}")
+    else:
+        st.warning("⚠ No images found. Try a different search term.")
+
+# ❤️ Display Favorites Section
+st.sidebar.header("⭐ Favorite Images")
+if st.session_state.favorites:
+    for fav in st.session_state.favorites:
+        st.sidebar.image(fav["src"]["medium"], caption=fav["photographer"], use_container_width=True)
+        if st.sidebar.button("❌ Remove", key=f"remove_{fav['id']}"):
+            remove_from_favorites(fav)
+
+    zip_file = download_favorites_as_zip()
+    if zip_file:
+        st.sidebar.download_button("📥 Download All as ZIP", zip_file, file_name="favorite_images.zip", mime="application/zip")
+
+else:
+    st.sidebar.write("No favorites yet. Add some!")
