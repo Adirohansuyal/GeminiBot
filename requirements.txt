@@ -1,5 +1,10 @@
 streamlit
 pymupdf
+google-generativeai
+google-api-core
+pandas
+reportlab
+python-dotenv
 pytesseract
 pdf2image
 langdetect
@@ -7,9 +12,6 @@ gtts
 fpdf
 langcodes
 deep-translator
-google-generativeai
+Pillow
 torch
 transformers
-Pillow
-reportlab
-
