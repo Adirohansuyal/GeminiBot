@@ -25,7 +25,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-st.title("📸 Aerri AI Image Search")
+st.title("📸Aerri AI Image Search ")
 st.write("🔍 Find high-quality images with AI-powered captions!")
 
 # 🎯 Quick Search Categories

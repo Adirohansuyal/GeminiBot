@@ -1,0 +1,87 @@
+# Aerri AI Image Search
+
+Aerri AI Image Search is a Streamlit-powered web application that enables users to search and download high-quality images from the Pexels API. The application also leverages AI-powered captioning using a pre-trained BLIP (Bootstrapping Language-Image Pre-training) model to generate meaningful captions for images.
+
+## 🚀 Features
+
+- **Image Search:** Fetches high-quality images from the Pexels API based on user queries.
+- **AI-Powered Captions:** Uses the Salesforce BLIP model to generate captions for images.
+- **Favorites Management:** Allows users to save and manage favorite images.
+- **Bulk Download:** Users can download all favorite images as a ZIP file.
+- **Custom Styling:** Dark-themed UI with interactive components for a seamless experience.
+
+## 🛠 Tech Stack
+
+- **Frontend:** [Streamlit](https://streamlit.io/)
+- **API:** [Pexels API](https://www.pexels.com/api/)
+- **AI Model:** [Salesforce BLIP](https://huggingface.co/Salesforce/blip-image-captioning-base)
+- **Backend Processing:** Python, PIL (Pillow), Requests, Transformers
+
+## 📦 Installation
+
+1. **Clone the repository:**
+   ```sh
+   git clone https://github.com/your-username/Aerri-AI-Image-Search.git
+   cd Aerri-AI-Image-Search
+   ```
+
+2. **Create a virtual environment:**
+   ```sh
+   python -m venv venv
+   source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+   ```
+
+3. **Install dependencies:**
+   ```sh
+   pip install -r requirements.txt
+   ```
+
+4. **Run the application:**
+   ```sh
+   streamlit run app.py
+   ```
+
+## 🔑 API Key Setup
+
+To use the Pexels API, replace `PEXELS_API_KEY` in `app.py` with your own API key:
+```python
+PEXELS_API_KEY = "your_pexels_api_key_here"
+```
+
+## 📜 Usage
+
+1. Enter a search query or choose from quick categories.
+2. Adjust filters such as image orientation and number of results.
+3. Click the `Search` button to fetch images.
+4. View AI-generated captions and download images.
+5. Add images to favorites and download them as a ZIP file.
+
+## 🖼 AI Captioning
+
+The application uses the Salesforce BLIP model for image captioning:
+- Converts images to tensor format using `BlipProcessor`.
+- Generates captions using `BlipForConditionalGeneration`.
+- Decodes output tokens to natural language text.
+
+## 🛡 Error Handling & Logging
+
+- Handles API failures gracefully with error messages.
+- Session state ensures smooth UI updates and user interactions.
+- Images are downloaded and processed asynchronously to improve performance.
+
+## 🤝 Contributing
+
+1. Fork the repository.
+2. Create a new branch (`feature/your-feature`).
+3. Commit your changes (`git commit -m 'Add new feature'`).
+4. Push to the branch (`git push origin feature/your-feature`).
+5. Open a Pull Request.
+
+## 📜 License
+
+This project is licensed under the MIT License.
+
+---
+
+🔥 **Developed with Streamlit, AI, and ❤️ by [Your Name]**
+
