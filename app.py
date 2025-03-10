@@ -11,6 +11,9 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from dotenv import load_dotenv
 
+
+st.set_page_config(page_title="Aerri AI", page_icon="🤖", layout="wide")
+
 # 🔑 Load API Key
 load_dotenv()
 API_KEY = "AIzaSyB_dWktJovtRo_uej_NJSAV0wfUQ0D8ITI"
