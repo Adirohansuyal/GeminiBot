@@ -7,7 +7,7 @@ gtts
 fpdf
 langcodes
 deep-translator
-googletrans==4.0.0-rc1
+google-generativeai
 torch
 transformers
 Pillow
