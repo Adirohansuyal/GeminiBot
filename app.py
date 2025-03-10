@@ -214,12 +214,8 @@ elif page == " 🛠️Detection and Translation Tool":
             st.write("**Detailed Description:**", description)
 
             # **Ask Questions About the Image**
-            st.subheader("❓ Ask a Question About the Image")
-            user_question = st.text_input("Enter your question:")
+            
 
-            if user_question:
-                answer = answer_image_question(image, user_question)
-                st.write("**Answer:**", answer)
 
         elif file_type == "application/pdf":
             st.subheader("📜 PDF Text Extraction")
