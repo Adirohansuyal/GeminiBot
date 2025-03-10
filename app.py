@@ -222,8 +222,8 @@ elif page == " 🛠️Detection and Translation Tool":
 
         elif file_type == "application/pdf":
           st.subheader("📜 PDF Text Extraction")
-    pdf_bytes = uploaded_file.read()
-    extracted_text = extract_text_from_pdf(pdf_bytes) or extract_text_from_scanned_pdf(BytesIO(pdf_bytes))
+          pdf_bytes = uploaded_file.read()
+          extracted_text = extract_text_from_pdf(pdf_bytes) or extract_text_from_scanned_pdf(BytesIO(pdf_bytes))
 
     if extracted_text:
         detected_language = detect(extracted_text)
