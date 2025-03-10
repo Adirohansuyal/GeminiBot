@@ -1,6 +1,6 @@
 import streamlit as st
 
-st.set_page_config(page_title="Your New App Name", page_icon="ai.jpg")
+st.set_page_config(page_title="Your New App Name", page_icon="ai.jpg", layout="centered", initial_sidebar_state="expanded")
 
 import base64
 import os
