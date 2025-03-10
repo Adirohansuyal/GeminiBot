@@ -1,4 +1,9 @@
 import streamlit as st
+
+st.set_page_config(
+    page_title="Your New App Name",  # Change this to your desired app name
+    page_icon="🛠️"  # You can also use an emoji or upload an icon image
+)
 import base64
 import os
 import time
@@ -12,7 +17,7 @@ from reportlab.lib.pagesizes import letter
 from dotenv import load_dotenv
 
 
-st.set_page_config(page_title="Aerri AI", page_icon="🤖", layout="wide")
+
 
 # 🔑 Load API Key
 load_dotenv()
