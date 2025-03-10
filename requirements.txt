@@ -1,11 +1,5 @@
 streamlit
-base64
-pymupdf  # For PDF text extraction
-google-generativeai
-google-api-core
-pandas
-reportlab  # For generating PDFs
-python-dotenv
+pymupdf
 pytesseract
 pdf2image
 langdetect
@@ -13,6 +7,6 @@ gtts
 fpdf
 langcodes
 deep-translator
-pillow  # For image processing
 torch
 transformers
+Pillow
