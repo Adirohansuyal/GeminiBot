@@ -78,7 +78,15 @@ st.markdown("""
         .stDownloadButton > button, .stButton > button {
             background-color: #004d7a; color: white; border-radius: 5px;
         }
-        .sidebar .sidebar-content { background: linear-gradient(to right, #004d7a, #008793); color: white; }
+        /* Sidebar background color */
+        section[data-testid="stSidebar"] {
+            background: linear-gradient(to bottom, #004d7a, #008793);
+            color: white;
+        }
+        /* Sidebar content */
+        .sidebar .sidebar-content {
+            color: white;
+        }
     </style>
 """, unsafe_allow_html=True)
 
