@@ -225,12 +225,12 @@ elif page == " 🛠️Detection and Translation Tool":
           pdf_bytes = uploaded_file.read()
           extracted_text = extract_text_from_pdf(pdf_bytes) or extract_text_from_scanned_pdf(BytesIO(pdf_bytes))
 
-    if extracted_text:
-        detected_language = detect(extracted_text)
-        st.write(f"**Detected Language:** {Language.make(language=detected_language).display_name()}")
+        if extracted_text:
+           detected_language = detect(extracted_text)
+           st.write(f"**Detected Language:** {Language.make(language=detected_language).display_name()}")
 
-        language_choices = get_language_choices()
-        target_language = st.selectbox("Select target language for translation:", list(language_choices.keys()))
+           language_choices = get_language_choices()
+           target_language = st.selectbox("Select target language for translation:", list(language_choices.keys()))
 
         if target_language != Language.make(language=detected_language).display_name():
             translated_text = GoogleTranslator(source=detected_language, target=language_choices[target_language]).translate(extracted_text)
