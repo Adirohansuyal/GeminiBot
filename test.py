@@ -8,10 +8,18 @@ from fpdf import FPDF
 from langcodes import Language
 from deep_translator import GoogleTranslator
 import streamlit as st
+from PIL import Image
+import torch
+from transformers import BlipProcessor, BlipForConditionalGeneration
 
-st.title("📄 PDF Language Detection & Translation")
+st.title("📄 PDF & Image Analysis Tool")
 
-uploaded_file = st.file_uploader("Upload a PDF", type="pdf")
+uploaded_file = st.file_uploader("Upload a PDF or an Image", type=["pdf", "jpeg", "jpg", "png"])
+
+# Load AI models for image description & question answering
+processor = BlipProcessor.from_pretrained("Salesforce/blip-image-captioning-base")
+description_model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-captioning-base")
+vqa_model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-vqa-base")
 
 # **Language Mapping for gTTS**
 language_map = {
@@ -28,78 +36,36 @@ language_map = {
     "Russian": "ru"
 }
 
-def extract_text_from_scanned_pdf(uploaded_pdf):
-    """Extract text using OCR from scanned PDFs."""
-    images = convert_from_bytes(uploaded_pdf.getvalue())
-    extracted_text = "\n".join([pytesseract.image_to_string(img) for img in images])
-    return extracted_text
+def generate_image_description(image):
+    """Generate a detailed description of an image using BLIP model."""
+    inputs = processor(image, return_tensors="pt")
+    output = description_model.generate(**inputs, max_length=150)
+    description = processor.decode(output[0], skip_special_tokens=True)
+    return description
 
-def text_to_speech(text, lang):
-    """Convert text to speech and return a playable audio stream."""
-    tts = gTTS(text=text, lang=lang)
-    audio_buffer = BytesIO()
-    tts.write_to_fp(audio_buffer)
-    audio_buffer.seek(0)
-    return audio_buffer
-
-def save_translated_pdf(translated_text):
-    """Save translated text into a PDF and return its path."""
-    pdf = FPDF()
-    pdf.set_auto_page_break(auto=True, margin=15)
-    pdf.add_page()
-    pdf.set_font("Arial", size=12)
-    pdf.multi_cell(190, 10, translated_text)
-
-    pdf_file_path = "translated_document.pdf"
-    pdf.output(pdf_file_path)
-
-    return pdf_file_path
+def answer_image_question(image, question):
+    """Answer a user question about the image using the VQA model."""
+    inputs = processor(image, question, return_tensors="pt")
+    output = vqa_model.generate(**inputs, max_length=50)
+    answer = processor.decode(output[0], skip_special_tokens=True)
+    return answer
 
 if uploaded_file is not None:
-    pdf_document = fitz.open(stream=uploaded_file.read(), filetype="pdf")
-    
-    st.subheader("📑 Select Pages to Translate")
-    total_pages = len(pdf_document)
-    selected_pages = st.multiselect("Select pages:", list(range(1, total_pages + 1)), default=[1])
+    file_type = uploaded_file.type
 
-    text = ""
-    for page_num in selected_pages:
-        text += pdf_document[page_num - 1].get_text("text") + "\n"
+    if file_type in ["image/jpeg", "image/jpg", "image/png"]:
+        image = Image.open(uploaded_file)
+        st.image(image, caption="Uploaded Image", use_column_width=True)
 
-    if not text.strip():  # If no text is found, try OCR
-        st.warning("No text found in the PDF. Trying OCR...")
-        text = extract_text_from_scanned_pdf(uploaded_file)
+        # **Generate Image Description**
+        st.subheader("🖼️ Image Analysis & Description")
+        description = generate_image_description(image)
+        st.write("**Detailed Description:**", description)
 
-    if text.strip():
-        detected_language_code = detect(text)
-        detected_language_full = Language.make(language=detected_language_code).display_name()
-        st.write(f"**Detected Language:** {detected_language_full} ({detected_language_code})")
+        # **Ask Questions About the Image**
+        st.subheader("❓ Ask a Question About the Image")
+        user_question = st.text_input("Enter your question:")
 
-        target_language = st.selectbox("Select Target Language", list(language_map.keys()))
-
-        if st.button("Translate"):
-            target_code = language_map[target_language]
-            translated_text = GoogleTranslator(source="auto", target=target_code).translate(text)
-            st.text_area("Translated Text", translated_text, height=300)
-
-            # **Download Translated Text**
-            st.download_button(
-                label="📥 Download Translated Text",
-                data=translated_text,
-                file_name="translated_text.txt",
-                mime="text/plain"
-            )
-
-            # **Download Translated PDF**
-            if st.button("📄 Download as PDF"):
-                pdf_path = save_translated_pdf(translated_text)
-                with open(pdf_path, "rb") as pdf_file:
-                    st.download_button("Download PDF", pdf_file, "translated_document.pdf", "application/pdf")
-
-            # **Listen to Translated Text**
-            if st.button("🎧 Listen to Translated Text"):
-                audio_stream = text_to_speech(translated_text, target_code)
-                st.audio(audio_stream, format="audio/mp3")
-
-    else:
-        st.error("No text could be extracted from the PDF.")
+        if user_question:
+            answer = answer_image_question(image, user_question)
+            st.write("**Answer:**", answer)
