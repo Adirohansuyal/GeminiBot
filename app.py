@@ -453,7 +453,7 @@ elif page == "🔔 Updates":
 
 # 📄 PDF Processing Page
 elif page == "📄 PDF Processing":
-    st.title("📂 PDF Processing")
+    st.title("📂 PDF Processing by Aerri AI")
 
     uploaded_file = st.file_uploader("📂 Upload a PDF file", type=["pdf"])
 
