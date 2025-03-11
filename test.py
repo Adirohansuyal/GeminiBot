@@ -1,149 +1,161 @@
 import streamlit as st
-import zipfile
 import requests
-from transformers import BlipProcessor, BlipForConditionalGeneration
-from PIL import Image
-from io import BytesIO
+import time
+import base64
 
-# 🔑 Replace this with your actual API key
-PEXELS_API_KEY = "HUEEXguBPn0FmAJbQyI4JBLcq20PjZw5r4zIfwusEH2KtWOuXsmxvsQm"
-PEXELS_API_URL = "https://api.pexels.com/v1/search"
 
-# 🎨 Page Configuration
-st.set_page_config(page_title="Aerri AI Image Search", layout="wide")
 
-# 🌟 Custom Background and Styling
+
+
+# 🎨 Streamlit App Title
+st.set_page_config(page_title="AI Image Generator", page_icon="🎨", layout="wide")
+st.title("🎨 Free AI Image Generator (Stable Diffusion)")
+
 st.markdown(
     """
     <style>
-    [data-testid="stAppViewContainer"] { background: linear-gradient(to right, #141E30, #243B55); }
-    [data-testid="stMarkdownContainer"], .stTextInput, .stRadio, .stSlider, label { color: #ffffff !important; }
-    .stTextInput>div>div>input { color: #ffffff !important; background-color: #1e2a38 !important; border-radius: 8px; padding: 5px; caret-color: #00ffff !important; border: 1px solid #00ffff; }
-    h1, h2, h3, h4, h5, h6 { color: #00ffff !important; }
+    html, body, .main {
+        background: linear-gradient(135deg, #5a007f, #a64ac9) !important;
+        color: white !important;
+        height: 100vh !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: hidden !important;
+    }
+
+    /* Container Styling */
+    .block-container {
+        background: rgba(255, 255, 255, 0.1) !important;
+        padding: 40px !important;
+        border-radius: 15px !important;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2) !important;
+        width: 90% !important;
+        max-width: 1100px !important;
+        margin: auto !important;
+    }
+
+    /* Headings */
+    h1, h2, h3, h4, h5, h6 {
+        color: white !important;
+        font-weight: bold !important;
+        text-align: center !important;
+        text-shadow: 2px 2px 10px rgba(255, 255, 255, 0.3) !important;
+    }
+
+    /* Buttons */
+    .stButton>button {
+        background: linear-gradient(135deg, #5a007f, #a64ac9) !important;
+        color: white !important;
+        border-radius: 10px !important;
+        font-size: 18px !important;
+        font-weight: bold !important;
+        transition: all 0.3s ease-in-out !important;
+    }
+
+    .stButton>button:hover {
+        background: linear-gradient(135deg, #a64ac9, #d29bff) !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0px 5px 12px rgba(166, 74, 201, 0.4) !important;
+    }
     </style>
     """,
-    unsafe_allow_html=True,
+    unsafe_allow_html=True
 )
 
-st.title("📸Aerri AI Image Search ")
-st.write("🔍 Find high-quality images with AI-powered captions!")
 
-# 🎯 Quick Search Categories
-categories = ["Nature", "Animals", "Technology", "Travel", "Food"]
-selected_category = st.radio("Quick Categories:", categories, horizontal=True)
 
-# 🔍 User Search Input
-query = st.text_input("Enter a search term:", selected_category)
 
-# 🖼️ Image Filters
-col1, col2 = st.columns(2)
-with col1:
-    num_images = st.slider("Number of images:", 5, 20, 10)
-with col2:
-    orientation = st.selectbox("Image Orientation:", ["All", "Landscape", "Portrait", "Square"])
 
-# 📥 Fetch Images from Pexels API
-def fetch_images(query, per_page=10, orientation=None):
-    headers = {"Authorization": PEXELS_API_KEY}
-    params = {"query": query, "per_page": per_page}
-    
-    if orientation and orientation != "All":
-        params["orientation"] = orientation.lower()
 
-    response = requests.get(PEXELS_API_URL, headers=headers, params=params)
-    
-    if response.status_code == 200:
-        return response.json().get("photos", [])
+
+
+
+
+# 🚀 API Key & Endpoint
+HF_API_KEY = "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"  # Replace with your own key
+API_URL = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-2"
+
+# 📌 Headers for API request
+headers = {"Authorization": f"Bearer {HF_API_KEY}"}
+
+# 🎭 Model Selection
+models = {
+    "Stable Diffusion 2.1": "stabilityai/stable-diffusion-2-1",
+    "Stable Diffusion 1.5": "runwayml/stable-diffusion-v1-5",
+    "Stable Diffusion XL": "stabilityai/stable-diffusion-xl-base-1.0"
+}
+selected_model = st.selectbox("🖼️ Choose a model:", list(models.keys()))
+API_URL = f"https://api-inference.huggingface.co/models/{models[selected_model]}"
+
+# 🎨 Style Selection
+styles = ["Realistic", "Anime", "Pixel Art", "Cyberpunk", "Watercolor"]
+style_choice = st.selectbox("🎭 Choose an image style:", styles)
+
+# 📐 Image Resolution Selection
+resolutions = {
+    "Standard (512x512)": (512, 512),
+    "High Quality (768x768)": (768, 768)
+}
+resolution_label = st.radio("📏 Select Image Resolution:", list(resolutions.keys()))
+width, height = resolutions[resolution_label]
+
+# 📝 User Prompt Input
+prompt = st.text_area("✏️ Enter a prompt for the AI to generate an image:", "A futuristic city at night with neon lights.")
+
+# ❌ Negative Prompt
+negative_prompt = st.text_area("❌ Things to Avoid:", "low quality, blurry, watermark")
+
+# 🚀 Generate Image Button
+if st.button("🔄 Generate Image"):
+    if not prompt.strip():
+        st.error("⚠️ Please enter a valid prompt.")
     else:
-        st.error("❌ Failed to fetch images. Please check your API key.")
-        return []
+        st.info("⏳ Generating image... Please wait.")
 
-# 🤖 AI Captioning Setup
-MODEL_NAME = "Salesforce/blip-image-captioning-base"
-processor = BlipProcessor.from_pretrained(MODEL_NAME)
-model = BlipForConditionalGeneration.from_pretrained(MODEL_NAME)
+        # 🌍 API Request Data
+        data = {
+            "inputs": f"{prompt}, in {style_choice} style",
+            "parameters": {
+                "negative_prompt": negative_prompt,
+                "width": width,
+                "height": height
+            }
+        }
 
-# 🔥 Function to Generate AI Captions
-def generate_caption(image_url):
-    response = requests.get(image_url)
-    image = Image.open(BytesIO(response.content)).convert("RGB")
-    
-    inputs = processor(image, return_tensors="pt")
-    caption_ids = model.generate(**inputs)
-    caption = processor.batch_decode(caption_ids, skip_special_tokens=True)[0]
+        # ⏳ Timer Start
+        start_time = time.time()
 
-    return caption
+        try:
+            response = requests.post(API_URL, headers=headers, json=data)
+            end_time = time.time()
 
-# ⭐ Favorites Feature
-if "favorites" not in st.session_state:
-    st.session_state.favorites = []
+            if response.status_code == 200:
+                image_bytes = response.content
+                image_filename = "generated_image.png"
 
-def add_to_favorites(photo):
-    if photo not in st.session_state.favorites:
-        st.session_state.favorites.append(photo)
-        st.success("Added to favorites!")
+                # Save Image Locally
+                with open(image_filename, "wb") as f:
+                    f.write(image_bytes)
 
-def remove_from_favorites(photo):
-    if photo in st.session_state.favorites:
-        st.session_state.favorites.remove(photo)
-        st.warning("Removed from favorites.")
-def download_favorites_as_zip():
-    if not st.session_state.favorites:
-        st.error("No favorites to download!")
-        return None
-    
-    zip_buffer = BytesIO()
-    with zipfile.ZipFile(zip_buffer, "w") as zip_file:
-        for index, fav in enumerate(st.session_state.favorites):
-            image_url = fav["src"]["original"]
-            image_data = requests.get(image_url).content
-            zip_file.writestr(f"image_{index + 1}.jpg", image_data)
-    
-    zip_buffer.seek(0)
-    return zip_buffer
+                # Display Image
+                st.image(image_filename, caption="🎨 Generated Image", use_container_width=True)
 
-# 🔄 Load More Button
-if "page" not in st.session_state:
-    st.session_state.page = 1
+                st.success(f"✅ Image generated in {end_time - start_time:.2f} seconds!")
 
-if st.button("🔍 Search") or st.session_state.page > 1:
-    st.session_state.page += 1
-    photos = fetch_images(query, per_page=num_images, orientation=orientation)
+                # Save Image to History
+                if "image_history" not in st.session_state:
+                    st.session_state.image_history = []
 
-    if photos:
-        cols = st.columns(4)
-        for index, photo in enumerate(photos):
-            with cols[index % 4]:
-                st.image(photo["src"]["medium"], caption=photo["photographer"], use_container_width=True)
+                st.session_state.image_history.append(image_filename)
 
-                # 🔥 Generate AI Caption
-                with st.spinner("Generating AI caption... 🤖"):
-                    caption = generate_caption(photo["src"]["original"])
-                st.write(f"📝 **AI Caption:** {caption}")
+                # Download Button
+                b64_image = base64.b64encode(image_bytes).decode()
+                href = f'<a href="data:file/png;base64,{b64_image}" download="AI_image.png">⬇️ Download Image</a>'
+                st.markdown(href, unsafe_allow_html=True)
 
-                st.markdown(f"[🔗 View HD]({photo['src']['original']})", unsafe_allow_html=True)
-                
-                # ⭐ Favorite Button
-                if st.button("⭐ Add to Favorites", key=f"fav_{photo['id']}"):
-                    add_to_favorites(photo)
+            else:
+                st.error(f"⚠️ API Error: {response.json()}")
 
-                # ⬇ Download Button
-                image_data = requests.get(photo["src"]["original"]).content
-                st.download_button("📥 Download", image_data, file_name=f"{photo['id']}.jpg", mime="image/jpeg", key=f"download_{photo['id']}")
-    else:
-        st.warning("⚠ No images found. Try a different search term.")
+        except requests.exceptions.RequestException as e:
+            st.error(f"❌ Connection error: {e}")
 
-# ❤️ Display Favorites Section
-st.sidebar.header("⭐ Favorite Images")
-if st.session_state.favorites:
-    for fav in st.session_state.favorites:
-        st.sidebar.image(fav["src"]["medium"], caption=fav["photographer"], use_container_width=True)
-        if st.sidebar.button("❌ Remove", key=f"remove_{fav['id']}"):
-            remove_from_favorites(fav)
-
-    zip_file = download_favorites_as_zip()
-    if zip_file:
-        st.sidebar.download_button("📥 Download All as ZIP", zip_file, file_name="favorite_images.zip", mime="application/zip")
-
-else:
-    st.sidebar.write("No favorites yet. Add some!")

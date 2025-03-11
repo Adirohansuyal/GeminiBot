@@ -1,0 +1,18 @@
+Aerri AI Maps: AI-Powered Location Discovery 🌍
+
+Aerri AI Maps is an intelligent location-based web application that helps users search for places, explore interesting facts, and visualize locations on an interactive map. This app integrates various technologies to provide a seamless and AI-driven mapping experience.
+
+🔧 Technologies Used:
+🌐 Streamlit – Provides an interactive and user-friendly web interface.
+
+📍 TomTom Search API – Retrieves latitude and longitude coordinates based on user input for precise location mapping.
+
+🗺️ Folium & Streamlit-Folium – Enables interactive maps and dynamic marker placements for location visualization.
+
+🤖 Gemini AI (Google Generative AI) – Generates insightful facts about locations using natural language processing (NLP).
+
+📸 Pexels API – Fetches high-quality images related to the searched location for better visual representation.
+
+🔄 Requests Library – Handles API calls to retrieve data efficiently.
+
+This AI-powered mapping application blends machine learning, geolocation services, and rich media integration to enhance user exploration. 🚀
