@@ -137,7 +137,7 @@ if page == "🏠 Home":
             dismiss_update()
             st.rerun()
 
-elif page == "  📸 Aerri AI Image Search":
+elif page == "  📸Aerri AI Image Search":
     import streamlit as st
     import zipfile
     import requests
@@ -173,7 +173,7 @@ elif page == "  📸 Aerri AI Image Search":
     
 
     # 🎯 Quick Search Categories
-    categories = ["Nature", "Animals", "Technology", "Travel", "Food",]
+    categories = ["Nature", "Animals", "Technology", "Travel", "Food"]
     selected_category = st.radio("Quick Categories:", categories, horizontal=True)
     
 
