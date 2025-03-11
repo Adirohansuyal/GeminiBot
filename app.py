@@ -173,7 +173,7 @@ elif page == "  📸 Aerri AI Image Search":
     
 
     # 🎯 Quick Search Categories
-    categories = ["Nature", "Animals", "Technology", "Travel", "Food", "Cars", "Music", "Art", "Fashion", "Fitness"]
+    categories = ["Nature", "Animals", "Technology", "Travel", "Food"]
     selected_category = st.radio("Quick Categories:", categories, horizontal=True)
     
 
