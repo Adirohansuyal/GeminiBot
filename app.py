@@ -137,7 +137,7 @@ if page == "🏠 Home":
             dismiss_update()
             st.rerun()
 
-elif page == "  📸Aerri AI Image Search":
+elif page == " 📸 Aerri AI Image Search ":
     import streamlit as st
     import zipfile
     import requests
