@@ -101,7 +101,7 @@ if st.sidebar.toggle("☀️ Light Mode", value=True):
 
 # 🎨 Sidebar Navigation
 st.sidebar.title("📂 Navigation")
-page = st.sidebar.radio("Go to", ["🏠 Home", "📄 PDF Processing", "💬 Chat with AI", "🔔 Updates", " 🛠️Detection and Translation Tool", "Aerri AI Image Search 📸"])
+page = st.sidebar.radio("Go to", ["🏠 Home", "📄 PDF Processing", "💬 Chat with AI", "🔔 Updates", " 🛠️Detection and Translation Tool", " 📸 Aerri AI Image Search "])
 
 # 🚀 Home Page
 if page == "🏠 Home":
@@ -137,7 +137,7 @@ if page == "🏠 Home":
             dismiss_update()
             st.rerun()
 
-elif page == "Aerri AI Image Search 📸":
+elif page == "  📸 Aerri AI Image Search":
     import streamlit as st
     import zipfile
     import requests
