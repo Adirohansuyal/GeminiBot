@@ -20,6 +20,4 @@ folium
 pandas
 openpyxl
 requests
-
-time
 base64
