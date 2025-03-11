@@ -16,8 +16,6 @@ Pillow
 torch
 transformers
 streamlit_folium
-folium
-pandas
 openpyxl
 requests
-base64
+
