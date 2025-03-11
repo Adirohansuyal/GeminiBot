@@ -20,7 +20,6 @@ folium
 pandas
 openpyxl
 requests
-folium
-streamlit_folium
+
 time
 base64
