@@ -19,7 +19,7 @@ if "favorites" not in st.session_state:
 
 # 🔑 Load API Key
 load_dotenv()
-API_KEY = "AIzaSyB_dWktJovtRo_uej_NJSAV0wfUQ0D8ITI"
+API_KEY = "AIzaSyDhO8U7Pdod8g-WGuN_VM1JFyl06cUcn2I"
 if not API_KEY:
     raise ValueError("API Key is missing! Set GOOGLE_API_KEY in .env")
 
